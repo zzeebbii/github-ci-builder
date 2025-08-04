@@ -34,6 +34,8 @@ export default function WorkflowCanvas() {
     updateNodePositions,
     updateEdges,
     autoArrangeNodes,
+    validateConnection,
+    addToast,
     setSelectedNode,
     syncFromVisual,
   } = useWorkflowStore();
@@ -56,16 +58,41 @@ export default function WorkflowCanvas() {
 
   const onConnect = useCallback(
     (params: Connection) => {
+      if (!params.source || !params.target) return;
+
+      // Validate the connection
+      const validation = validateConnection(params.source, params.target);
+
+      if (!validation.isValid) {
+        // Show error toast instead of alert
+        addToast(`Cannot create connection: ${validation.error}`, "error");
+        return;
+      }
+
       const newEdge = {
         id: `${params.source}-${params.target}`,
-        source: params.source!,
-        target: params.target!,
+        source: params.source,
+        target: params.target,
         type: "flow" as const,
         animated: true,
       };
       addStoreEdge(newEdge);
+      addToast("Connection created successfully", "success");
     },
-    [addStoreEdge]
+    [addStoreEdge, validateConnection, addToast]
+  );
+
+  const isValidConnection = useCallback(
+    (connection: Connection | VisualEdge) => {
+      const source = "source" in connection ? connection.source : "";
+      const target = "target" in connection ? connection.target : "";
+
+      if (!source || !target) return false;
+
+      const validation = validateConnection(source, target);
+      return validation.isValid;
+    },
+    [validateConnection]
   );
 
   const onNodeClick = useCallback(
@@ -159,6 +186,7 @@ export default function WorkflowCanvas() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        isValidConnection={isValidConnection}
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
         onDragOver={onDragOver}

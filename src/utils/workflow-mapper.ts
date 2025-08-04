@@ -31,7 +31,9 @@ export class WorkflowMapper {
       position: getPosition(),
       data: {
         label: this.getTriggerLabel(workflow.on),
-        trigger: workflow.on,
+        triggerType: this.getPrimaryTriggerType(workflow.on),
+        triggers: workflow.on, // Pass the full triggers object
+        trigger: workflow.on, // Keep for backward compatibility
         isValid: true,
         errors: [],
       },
@@ -215,6 +217,29 @@ export class WorkflowMapper {
     }
 
     return `Multiple Triggers (${triggerKeys.length})`;
+  }
+
+  /**
+   * Get the primary trigger type for visual representation
+   */
+  private static getPrimaryTriggerType(triggers: GitHubWorkflow["on"]): string {
+    // Priority order for trigger types
+    const priorityOrder = [
+      "push",
+      "pull_request",
+      "workflow_dispatch",
+      "schedule",
+    ];
+
+    for (const triggerType of priorityOrder) {
+      if (triggers[triggerType as keyof typeof triggers]) {
+        return triggerType;
+      }
+    }
+
+    // If none of the priority triggers are found, return the first available
+    const triggerKeys = Object.keys(triggers);
+    return triggerKeys.length > 0 ? triggerKeys[0] : "workflow_dispatch";
   }
 
   /**

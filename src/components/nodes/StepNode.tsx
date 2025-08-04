@@ -76,11 +76,7 @@ function StepNode({ data, selected }: NodeProps & { data: StepNodeData }) {
         <div className="mt-1 text-xs text-red-200">{data.errors![0]}</div>
       )}
 
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        className="w-2 h-2 !bg-green-400 !border-2 !border-white"
-      />
+      {/* Steps are end nodes in the workflow, so no source handle */}
     </div>
   );
 }

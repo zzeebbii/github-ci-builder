@@ -1,6 +1,15 @@
 import { useState } from "react";
-import { Play, Download, Upload, Save, Undo, Redo } from "lucide-react";
+import {
+  Play,
+  Download,
+  Upload,
+  Save,
+  Undo,
+  Redo,
+  Settings,
+} from "lucide-react";
 import { Link } from "react-router-dom";
+import { useWorkflowStore } from "../../store/workflow";
 import Sidebar from "../layout/Sidebar";
 import WorkflowCanvas from "../WorkflowCanvas";
 import Button from "../ui/Button";
@@ -9,6 +18,7 @@ import PropertiesPanel from "../PropertiesPanel";
 
 export default function BuilderView() {
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
+  const { setShowWorkflowProperties } = useWorkflowStore();
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -21,6 +31,13 @@ export default function BuilderView() {
             <Button variant="primary">
               <Play className="w-4 h-4" />
               Test Workflow
+            </Button>
+
+            <ToolbarSeparator />
+
+            <Button onClick={() => setShowWorkflowProperties(true)}>
+              <Settings className="w-4 h-4" />
+              Workflow Settings
             </Button>
 
             <ToolbarSeparator />
