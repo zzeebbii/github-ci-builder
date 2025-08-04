@@ -53,21 +53,28 @@ export default function StepProperties({
     return errors;
   }, [label, stepType, actionName, runCommand]);
 
-  const updateData = useCallback(() => {
-    const updatedData = {
-      label,
-      type: stepType,
-      actionName: stepType === "action" ? actionName : undefined,
-      actionVersion: stepType === "action" ? actionVersion : undefined,
-      runCommand: stepType === "run" ? runCommand : undefined,
-      shell: stepType === "run" ? shell : undefined,
-      workingDirectory: workingDirectory || undefined,
-      continueOnError: continueOnError || undefined,
-      condition: condition || undefined,
-      isValid: validateStep(),
-      errors: getValidationErrors(),
-    };
-    onUpdate(updatedData);
+  // Use useEffect to update data when form values change, but debounce the updates
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const updatedData = {
+        label,
+        type: stepType,
+        actionName: stepType === "action" ? actionName : undefined,
+        actionVersion: stepType === "action" ? actionVersion : undefined,
+        runCommand: stepType === "run" ? runCommand : undefined,
+        shell: stepType === "run" ? shell : undefined,
+        workingDirectory: workingDirectory || undefined,
+        continueOnError: continueOnError || undefined,
+        condition: condition || undefined,
+        isValid: validateStep(),
+        errors: getValidationErrors(),
+      };
+
+      onUpdate(updatedData);
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     label,
     stepType,
@@ -78,14 +85,7 @@ export default function StepProperties({
     workingDirectory,
     continueOnError,
     condition,
-    validateStep,
-    getValidationErrors,
-    onUpdate,
   ]);
-
-  useEffect(() => {
-    updateData();
-  }, [updateData]);
 
   const getStepIcon = () => {
     switch (stepType) {

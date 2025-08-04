@@ -5,9 +5,14 @@ import {
   Controls,
   MiniMap,
   BackgroundVariant,
+  Panel,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from "@xyflow/react";
-import type { Connection, Node } from "@xyflow/react";
+import type { Connection, Node, NodeChange, EdgeChange } from "@xyflow/react";
+import { LayoutGrid, Shuffle } from "lucide-react";
 import { useWorkflowStore } from "../store/workflow";
+import type { VisualNode, VisualEdge } from "../types/github-actions";
 import TriggerNode from "./nodes/TriggerNode";
 import JobNode from "./nodes/JobNode";
 import StepNode from "./nodes/StepNode";
@@ -26,9 +31,28 @@ export default function WorkflowCanvas() {
     selectedNode,
     addNode,
     addEdge: addStoreEdge,
+    updateNodePositions,
+    updateEdges,
+    autoArrangeNodes,
     setSelectedNode,
     syncFromVisual,
   } = useWorkflowStore();
+
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      const updatedNodes = applyNodeChanges(changes, nodes) as VisualNode[];
+      updateNodePositions(updatedNodes);
+    },
+    [nodes, updateNodePositions]
+  );
+
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) => {
+      const updatedEdges = applyEdgeChanges(changes, edges) as VisualEdge[];
+      updateEdges(updatedEdges);
+    },
+    [edges, updateEdges]
+  );
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -43,12 +67,6 @@ export default function WorkflowCanvas() {
     },
     [addStoreEdge]
   );
-
-  const onNodesChange = useCallback(() => {
-    // This will be called when nodes are moved/resized
-    // We'll sync changes back to the store
-    syncFromVisual();
-  }, [syncFromVisual]);
 
   const onNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
@@ -124,12 +142,22 @@ export default function WorkflowCanvas() {
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full relative">
+      {/* Auto-arrange button */}
+      <button
+        onClick={autoArrangeNodes}
+        className="absolute top-4 right-4 z-10 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium transition-colors"
+        title="Auto-arrange nodes"
+      >
+        Auto-arrange
+      </button>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}

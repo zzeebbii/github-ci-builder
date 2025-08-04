@@ -56,43 +56,34 @@ export default function TriggerProperties({
     return errors;
   }, [label, triggerType, schedule, branches]);
 
-  const updateData = useCallback(() => {
-    const updatedData = {
-      label,
-      triggerType,
-      branches: branches
-        .split(",")
-        .map((b) => b.trim())
-        .filter(Boolean),
-      paths: paths
-        ? paths
-            .split(",")
-            .map((p) => p.trim())
-            .filter(Boolean)
-        : undefined,
-      schedule: schedule || undefined,
-      isValid: validateTrigger(),
-      errors: getValidationErrors(),
-    };
-    onUpdate(updatedData);
-  }, [
-    label,
-    triggerType,
-    branches,
-    paths,
-    schedule,
-    validateTrigger,
-    getValidationErrors,
-    onUpdate,
-  ]);
-
+  // Use useEffect to update data when form values change, but debounce the updates
   useEffect(() => {
-    updateData();
-  }, [updateData]);
+    const timeoutId = setTimeout(() => {
+      const updatedData = {
+        label,
+        triggerType,
+        branches: branches
+          .split(",")
+          .map((b) => b.trim())
+          .filter(Boolean),
+        paths: paths
+          ? paths
+              .split(",")
+              .map((p) => p.trim())
+              .filter(Boolean)
+          : undefined,
+        schedule: schedule || undefined,
+        isValid: validateTrigger(),
+        errors: getValidationErrors(),
+      };
 
-  useEffect(() => {
-    updateData();
-  }, [updateData]);
+      // Only call onUpdate with the new data
+      onUpdate(updatedData);
+    }, 100); // Small debounce to prevent excessive updates
+
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [label, triggerType, branches, paths, schedule]); // Remove callback dependencies to prevent infinite loop
 
   const getTriggerIcon = () => {
     switch (triggerType) {

@@ -1,15 +1,24 @@
 import { useState } from "react";
 import { Upload, FileText, AlertCircle, CheckCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import * as yaml from "js-yaml";
+import { useWorkflowStore } from "../../store/workflow";
+import type { GitHubWorkflow } from "../../types/github-actions";
 
 export default function ImportView() {
+  const navigate = useNavigate();
+  const { setWorkflow } = useWorkflowStore();
   const [dragActive, setDragActive] = useState(false);
   const [fileContent, setFileContent] = useState<string>("");
   const [fileName, setFileName] = useState<string>("");
+  const [parsedWorkflow, setParsedWorkflow] = useState<GitHubWorkflow | null>(
+    null
+  );
   const [importStatus, setImportStatus] = useState<
-    "idle" | "success" | "error"
+    "idle" | "parsing" | "success" | "error"
   >("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [validationWarnings, setValidationWarnings] = useState<string[]>([]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -45,20 +54,64 @@ export default function ImportView() {
     }
 
     try {
+      setImportStatus("parsing");
       const content = await file.text();
       setFileContent(content);
       setFileName(file.name);
+
+      // Parse YAML content
+      const parsed = yaml.load(content) as GitHubWorkflow;
+
+      // Basic validation
+      if (!parsed || typeof parsed !== "object") {
+        throw new Error("Invalid YAML structure");
+      }
+
+      if (!parsed.name) {
+        throw new Error("Workflow must have a 'name' field");
+      }
+
+      if (!parsed.on) {
+        throw new Error("Workflow must have an 'on' field defining triggers");
+      }
+
+      if (!parsed.jobs || typeof parsed.jobs !== "object") {
+        throw new Error("Workflow must have a 'jobs' field");
+      }
+
+      // Check for warnings
+      const warnings: string[] = [];
+      if (Object.keys(parsed.jobs).length === 0) {
+        warnings.push("No jobs defined in workflow");
+      }
+
+      setParsedWorkflow(parsed);
+      setValidationWarnings(warnings);
       setImportStatus("success");
       setErrorMessage("");
     } catch (error) {
       setImportStatus("error");
-      setErrorMessage("Error reading file: " + (error as Error).message);
+      setParsedWorkflow(null);
+      if (error instanceof yaml.YAMLException) {
+        setErrorMessage(`YAML parsing error: ${error.message}`);
+      } else {
+        setErrorMessage("Error processing file: " + (error as Error).message);
+      }
     }
   };
 
   const handleImport = () => {
-    // TODO: Implement YAML parsing and workflow import
-    console.log("Importing workflow from YAML:", fileContent);
+    if (parsedWorkflow) {
+      try {
+        setWorkflow(parsedWorkflow);
+        navigate("/");
+      } catch (error) {
+        setImportStatus("error");
+        setErrorMessage(
+          "Error importing workflow: " + (error as Error).message
+        );
+      }
+    }
   };
 
   return (
@@ -96,6 +149,8 @@ export default function ImportView() {
                 ? "border-red-300 bg-red-50"
                 : importStatus === "success"
                 ? "border-green-300 bg-green-50"
+                : importStatus === "parsing"
+                ? "border-yellow-300 bg-yellow-50"
                 : "border-gray-300 bg-white hover:border-gray-400"
             }`}
             onDragEnter={handleDrag}
@@ -125,18 +180,36 @@ export default function ImportView() {
                 <h3 className="text-lg font-medium text-gray-900">
                   {importStatus === "success"
                     ? "File loaded successfully!"
+                    : importStatus === "parsing"
+                    ? "Parsing YAML file..."
                     : "Drop your YAML file here"}
                 </h3>
 
                 <p className="text-gray-600 mt-1">
                   {importStatus === "success"
                     ? `Loaded: ${fileName}`
+                    : importStatus === "parsing"
+                    ? "Validating workflow structure..."
                     : "or click to browse and select a .yml or .yaml file"}
                 </p>
 
                 {importStatus === "error" && (
                   <p className="text-red-600 text-sm mt-2">{errorMessage}</p>
                 )}
+
+                {importStatus === "success" &&
+                  validationWarnings.length > 0 && (
+                    <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <p className="text-yellow-800 text-sm font-medium mb-1">
+                        Warnings:
+                      </p>
+                      {validationWarnings.map((warning, index) => (
+                        <p key={index} className="text-yellow-700 text-xs">
+                          • {warning}
+                        </p>
+                      ))}
+                    </div>
+                  )}
               </div>
             </div>
           </div>
@@ -154,9 +227,16 @@ export default function ImportView() {
 
                 <button
                   onClick={handleImport}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={importStatus !== "success" || !parsedWorkflow}
+                  className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    importStatus === "success" && parsedWorkflow
+                      ? "text-white bg-blue-600 border-blue-600 hover:bg-blue-700"
+                      : "text-gray-400 bg-gray-100 border-gray-300 cursor-not-allowed"
+                  }`}
                 >
-                  Import Workflow
+                  {importStatus === "parsing"
+                    ? "Parsing..."
+                    : "Import Workflow"}
                 </button>
               </div>
 

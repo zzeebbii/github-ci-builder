@@ -1,45 +1,56 @@
 import { useState } from "react";
-import { Download, Copy, FileText, CheckCircle } from "lucide-react";
+import {
+  Download,
+  Copy,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
 import { Link } from "react-router-dom";
+import * as yaml from "js-yaml";
 import { useWorkflowStore } from "../../store/workflow";
 
 export default function ExportView() {
-  const { workflow } = useWorkflowStore();
+  const { workflow, isValid, errors, validateWorkflow } = useWorkflowStore();
   const [copied, setCopied] = useState(false);
+  const [exportError, setExportError] = useState<string>("");
 
-  // Generate YAML content (simplified for now)
+  // Generate YAML content using js-yaml for proper formatting
   const generateYAML = () => {
-    const yamlContent = `name: ${workflow.name || "CI"}
+    try {
+      // Validate workflow before export
+      validateWorkflow();
 
-on:
-${Object.keys(workflow.on || {})
-  .map((trigger) => `  ${trigger}:`)
-  .join("\n")}
+      // Create clean workflow object with explicit typing
+      const cleanWorkflow: Record<string, unknown> = {
+        name: workflow.name || "CI",
+        on: workflow.on || { push: { branches: ["main"] } },
+        jobs: workflow.jobs || {},
+      };
 
-jobs:
-${Object.entries(workflow.jobs || {})
-  .map(
-    ([jobId, job]) =>
-      `  ${jobId}:
-    runs-on: ${job["runs-on"]}
-    steps:
-${job.steps
-  .map(
-    (step) =>
-      `      - name: ${step.name || "Step"}
-        ${
-          step.uses
-            ? `uses: ${step.uses}`
-            : step.run
-            ? `run: ${step.run}`
-            : 'run: echo "Hello World"'
-        }`
-  )
-  .join("\n")}`
-  )
-  .join("\n\n")}`;
+      // Add additional properties if they exist on the workflow
+      const workflowAny = workflow as unknown as Record<string, unknown>;
+      if (workflowAny.env) cleanWorkflow.env = workflowAny.env;
+      if (workflowAny.defaults) cleanWorkflow.defaults = workflowAny.defaults;
+      if (workflowAny.concurrency)
+        cleanWorkflow.concurrency = workflowAny.concurrency;
+      if (workflowAny.permissions)
+        cleanWorkflow.permissions = workflowAny.permissions;
 
-    return yamlContent;
+      const yamlContent = yaml.dump(cleanWorkflow, {
+        indent: 2,
+        lineWidth: -1,
+        noRefs: true,
+        sortKeys: false,
+      });
+
+      setExportError("");
+      return yamlContent;
+    } catch (error) {
+      const errorMsg = `Export error: ${(error as Error).message}`;
+      setExportError(errorMsg);
+      return errorMsg;
+    }
   };
 
   const yamlContent = generateYAML();
@@ -92,11 +103,50 @@ ${job.steps
       {/* Content */}
       <div className="flex-1 p-6">
         <div className="max-w-4xl mx-auto space-y-6">
+          {/* Validation Status */}
+          {(!isValid || errors.length > 0) && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="w-4 h-4 text-red-500" />
+                <span className="text-sm font-medium text-red-900">
+                  Validation Issues
+                </span>
+              </div>
+              <div className="space-y-1">
+                {errors.map((error, index) => (
+                  <p key={index} className="text-xs text-red-700">
+                    • {error}
+                  </p>
+                ))}
+              </div>
+              <p className="text-xs text-red-600 mt-2">
+                Fix these issues in the builder before exporting.
+              </p>
+            </div>
+          )}
+
+          {exportError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-500" />
+                <span className="text-sm font-medium text-red-900">
+                  Export Error
+                </span>
+              </div>
+              <p className="text-xs text-red-700 mt-1">{exportError}</p>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex items-center gap-4">
             <button
               onClick={handleDownload}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={!isValid || exportError !== ""}
+              className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-md focus:outline-none focus:ring-2 ${
+                isValid && exportError === ""
+                  ? "text-white bg-blue-600 border-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+                  : "text-gray-400 bg-gray-100 border-gray-300 cursor-not-allowed"
+              }`}
             >
               <Download className="w-4 h-4" />
               Download YAML
@@ -104,10 +154,13 @@ ${job.steps
 
             <button
               onClick={handleCopy}
+              disabled={!isValid || exportError !== ""}
               className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-md focus:outline-none focus:ring-2 transition-colors ${
                 copied
                   ? "text-green-700 bg-green-50 border-green-200"
-                  : "text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:ring-blue-500"
+                  : isValid && exportError === ""
+                  ? "text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:ring-blue-500"
+                  : "text-gray-400 bg-gray-100 border-gray-300 cursor-not-allowed"
               }`}
             >
               {copied ? (

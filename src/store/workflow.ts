@@ -34,8 +34,11 @@ interface WorkflowState {
   addNode: (node: VisualNode) => void;
   updateNode: (id: string, updates: Partial<VisualNode>) => void;
   updateNodeData: (id: string, data: Record<string, unknown>) => void;
+  updateNodePositions: (nodes: VisualNode[]) => void;
+  autoArrangeNodes: () => void;
   removeNode: (id: string) => void;
   addEdge: (edge: VisualEdge) => void;
+  updateEdges: (edges: VisualEdge[]) => void;
   removeEdge: (id: string) => void;
   setSelectedNode: (id: string | null) => void;
   validateWorkflow: () => void;
@@ -151,6 +154,85 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     get().syncFromVisual();
   },
 
+  updateNodePositions: (nodes) => {
+    set({ nodes });
+    get().syncFromVisual();
+  },
+
+  autoArrangeNodes: () => {
+    const { nodes, edges } = get();
+    if (nodes.length === 0) return;
+
+    // Simple auto-layout algorithm - arrange nodes in layers
+    const arrangedNodes = [...nodes];
+    const visited = new Set<string>();
+    const layers: string[][] = [];
+
+    // Find root nodes (triggers - nodes with no incoming edges)
+    const rootNodes = nodes.filter(
+      (node) =>
+        !edges.some((edge) => edge.target === node.id) ||
+        node.type === "trigger"
+    );
+
+    // Layer-based layout
+    const processLayer = (currentNodes: string[], layer: number) => {
+      if (currentNodes.length === 0) return;
+      layers[layer] = currentNodes;
+
+      const nextNodes: string[] = [];
+      currentNodes.forEach((nodeId) => {
+        visited.add(nodeId);
+        // Find connected nodes
+        edges.forEach((edge) => {
+          if (edge.source === nodeId && !visited.has(edge.target)) {
+            nextNodes.push(edge.target);
+          }
+        });
+      });
+
+      if (nextNodes.length > 0) {
+        processLayer(nextNodes, layer + 1);
+      }
+    };
+
+    processLayer(
+      rootNodes.map((n) => n.id),
+      0
+    );
+
+    // Position nodes based on layers
+    const layerHeight = 120;
+    const nodeWidth = 200;
+    const nodeSpacing = 50;
+
+    layers.forEach((layer, layerIndex) => {
+      layer.forEach((nodeId, positionIndex) => {
+        const nodeIndex = arrangedNodes.findIndex((n) => n.id === nodeId);
+        if (nodeIndex !== -1) {
+          const totalWidth =
+            layer.length * nodeWidth + (layer.length - 1) * nodeSpacing;
+          const startX = -totalWidth / 2;
+
+          // Create a new node object with updated position
+          arrangedNodes[nodeIndex] = {
+            ...arrangedNodes[nodeIndex],
+            position: {
+              x:
+                startX +
+                positionIndex * (nodeWidth + nodeSpacing) +
+                nodeWidth / 2,
+              y: layerIndex * layerHeight,
+            },
+          };
+        }
+      });
+    });
+
+    set({ nodes: arrangedNodes });
+    get().syncFromVisual();
+  },
+
   removeNode: (id) => {
     set((state) => ({
       nodes: state.nodes.filter((node) => node.id !== id),
@@ -166,6 +248,11 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     set((state) => ({
       edges: [...state.edges, edge],
     }));
+    get().syncFromVisual();
+  },
+
+  updateEdges: (edges) => {
+    set({ edges });
     get().syncFromVisual();
   },
 

@@ -42,33 +42,26 @@ export default function JobProperties({
     return errors;
   }, [label, runsOn, timeoutMinutes]);
 
-  const updateData = useCallback(() => {
-    const updatedData = {
-      label,
-      runsOn,
-      timeoutMinutes,
-      strategy: strategy || undefined,
-      environment: environment || undefined,
-      permissions: permissions || undefined,
-      isValid: validateJob(),
-      errors: getValidationErrors(),
-    };
-    onUpdate(updatedData);
-  }, [
-    label,
-    runsOn,
-    timeoutMinutes,
-    strategy,
-    environment,
-    permissions,
-    validateJob,
-    getValidationErrors,
-    onUpdate,
-  ]);
-
+  // Use useEffect to update data when form values change, but debounce the updates
   useEffect(() => {
-    updateData();
-  }, [updateData]);
+    const timeoutId = setTimeout(() => {
+      const updatedData = {
+        label,
+        runsOn,
+        timeoutMinutes,
+        strategy: strategy || undefined,
+        environment: environment || undefined,
+        permissions: permissions || undefined,
+        isValid: validateJob(),
+        errors: getValidationErrors(),
+      };
+
+      onUpdate(updatedData);
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [label, runsOn, timeoutMinutes, strategy, environment, permissions]);
 
   const getRunnerOptions = () => [
     {
