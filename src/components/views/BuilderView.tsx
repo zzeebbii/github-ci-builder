@@ -3,9 +3,9 @@ import { Play, Download, Upload, Save, Undo, Redo } from "lucide-react";
 import { Link } from "react-router-dom";
 import Sidebar from "../layout/Sidebar";
 import WorkflowCanvas from "../WorkflowCanvas";
-import PropertiesPanel from "../layout/PropertiesPanel";
 import Button from "../ui/Button";
 import ToolbarSeparator from "../ui/ToolbarSeparator";
+import PropertiesPanel from "../layout/PropertiesPanel";
 
 export default function BuilderView() {
   const [selectedTool, setSelectedTool] = useState<string | null>(null);

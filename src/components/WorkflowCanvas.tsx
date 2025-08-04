@@ -7,9 +7,9 @@ import {
   useNodesState,
   useEdgesState,
   addEdge,
-  Connection,
-  Edge,
+  BackgroundVariant,
 } from "@xyflow/react";
+import type { Connection } from "@xyflow/react";
 
 // Sample initial nodes for demonstration
 const initialNodes = [
@@ -75,7 +75,7 @@ const initialEdges = [
 ];
 
 export default function WorkflowCanvas() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
@@ -104,7 +104,7 @@ export default function WorkflowCanvas() {
           }}
           className="!bg-white !border !border-gray-200"
         />
-        <Background variant="dots" gap={12} size={1} />
+        <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
 
       {/* Placeholder for when no workflow is loaded */}
