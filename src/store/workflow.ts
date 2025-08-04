@@ -33,6 +33,7 @@ interface WorkflowState {
   syncToVisual: () => void;
   addNode: (node: VisualNode) => void;
   updateNode: (id: string, updates: Partial<VisualNode>) => void;
+  updateNodeData: (id: string, data: Record<string, unknown>) => void;
   removeNode: (id: string) => void;
   addEdge: (edge: VisualEdge) => void;
   removeEdge: (id: string) => void;
@@ -141,6 +142,15 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     get().syncFromVisual();
   },
 
+  updateNodeData: (id, data) => {
+    set((state) => ({
+      nodes: state.nodes.map((node) =>
+        node.id === id ? { ...node, data: { ...node.data, ...data } } : node
+      ),
+    }));
+    get().syncFromVisual();
+  },
+
   removeNode: (id) => {
     set((state) => ({
       nodes: state.nodes.filter((node) => node.id !== id),
@@ -206,3 +216,8 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     get().syncToVisual();
   },
 }));
+
+// Initialize the store with default workflow and visual representation
+setTimeout(() => {
+  useWorkflowStore.getState().resetToDefault();
+}, 0);

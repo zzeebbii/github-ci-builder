@@ -377,7 +377,7 @@ export interface VisualNode {
   data: NodeData;
 }
 
-export interface NodeData {
+export interface NodeData extends Record<string, unknown> {
   label: string;
   job?: Job;
   step?: Step;

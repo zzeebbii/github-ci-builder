@@ -4,111 +4,164 @@ import {
   Background,
   Controls,
   MiniMap,
-  useNodesState,
-  useEdgesState,
-  addEdge,
   BackgroundVariant,
 } from "@xyflow/react";
-import type { Connection } from "@xyflow/react";
+import type { Connection, Node } from "@xyflow/react";
+import { useWorkflowStore } from "../store/workflow";
+import TriggerNode from "./nodes/TriggerNode";
+import JobNode from "./nodes/JobNode";
+import StepNode from "./nodes/StepNode";
 
-// Sample initial nodes for demonstration
-const initialNodes = [
-  {
-    id: "1",
-    type: "default",
-    position: { x: 250, y: 25 },
-    data: {
-      label: "Workflow Trigger",
-    },
-    style: {
-      background: "#e0f2fe",
-      border: "2px solid #0277bd",
-      borderRadius: "8px",
-      padding: "10px",
-    },
-  },
-  {
-    id: "2",
-    type: "default",
-    position: { x: 250, y: 125 },
-    data: {
-      label: "Build Job",
-    },
-    style: {
-      background: "#f3e5f5",
-      border: "2px solid #7b1fa2",
-      borderRadius: "8px",
-      padding: "10px",
-    },
-  },
-  {
-    id: "3",
-    type: "default",
-    position: { x: 250, y: 225 },
-    data: {
-      label: "Test Job",
-    },
-    style: {
-      background: "#e8f5e8",
-      border: "2px solid #388e3c",
-      borderRadius: "8px",
-      padding: "10px",
-    },
-  },
-];
-
-const initialEdges = [
-  {
-    id: "e1-2",
-    source: "1",
-    target: "2",
-    animated: true,
-    style: { stroke: "#0277bd" },
-  },
-  {
-    id: "e2-3",
-    source: "2",
-    target: "3",
-    animated: true,
-    style: { stroke: "#7b1fa2" },
-  },
-];
+// Define custom node types
+const nodeTypes = {
+  trigger: TriggerNode,
+  job: JobNode,
+  step: StepNode,
+};
 
 export default function WorkflowCanvas() {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const {
+    nodes,
+    edges,
+    selectedNode,
+    addNode,
+    addEdge: addStoreEdge,
+    setSelectedNode,
+    syncFromVisual,
+  } = useWorkflowStore();
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
+    (params: Connection) => {
+      const newEdge = {
+        id: `${params.source}-${params.target}`,
+        source: params.source!,
+        target: params.target!,
+        type: "flow" as const,
+        animated: true,
+      };
+      addStoreEdge(newEdge);
+    },
+    [addStoreEdge]
   );
+
+  const onNodesChange = useCallback(() => {
+    // This will be called when nodes are moved/resized
+    // We'll sync changes back to the store
+    syncFromVisual();
+  }, [syncFromVisual]);
+
+  const onNodeClick = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      setSelectedNode(node.id);
+    },
+    [setSelectedNode]
+  );
+
+  const onPaneClick = useCallback(() => {
+    setSelectedNode(null);
+  }, [setSelectedNode]);
+
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+
+      const reactFlowBounds = (event.target as Element).getBoundingClientRect();
+      const data = event.dataTransfer.getData("application/reactflow");
+
+      if (!data) return;
+
+      const { type, id, label } = JSON.parse(data);
+      const position = {
+        x: event.clientX - reactFlowBounds.left,
+        y: event.clientY - reactFlowBounds.top,
+      };
+
+      const newNode = {
+        id: `${type}-${Date.now()}`,
+        type,
+        position,
+        data: createNodeData(type, id, label),
+      };
+
+      addNode(newNode);
+    },
+    [addNode]
+  );
+
+  const createNodeData = (nodeType: string, itemId: string, label: string) => {
+    switch (nodeType) {
+      case "trigger":
+        return {
+          label,
+          triggerType: itemId,
+          isValid: true,
+          errors: [],
+        };
+      case "job":
+        return {
+          label,
+          runsOn: "ubuntu-latest",
+          stepCount: 0,
+          isValid: true,
+          errors: [],
+        };
+      case "step":
+        return {
+          label,
+          type: itemId === "action" ? "action" : "run",
+          actionName: itemId === "action" ? "actions/checkout@v4" : undefined,
+          isValid: true,
+          errors: [],
+        };
+      default:
+        return { label, isValid: true, errors: [] };
+    }
+  };
 
   return (
     <div className="w-full h-full">
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeClick={onNodeClick}
+        onPaneClick={onPaneClick}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
         fitView
         className="bg-gray-50"
+        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+        minZoom={0.5}
+        maxZoom={2}
       >
         <Controls />
         <MiniMap
           nodeColor={(node) => {
-            if (node.style?.background) {
-              return node.style.background as string;
+            switch (node.type) {
+              case "trigger":
+                return "#3b82f6";
+              case "job":
+                return "#8b5cf6";
+              case "step":
+                return "#10b981";
+              default:
+                return "#e2e8f0";
             }
-            return "#e2e8f0";
           }}
           className="!bg-white !border !border-gray-200"
         />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
 
-      {/* Placeholder for when no workflow is loaded */}
-      {nodes.length === 3 && (
+      {/* Empty state */}
+      {nodes.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center text-gray-500 bg-white/80 p-6 rounded-lg backdrop-blur-sm">
             <h3 className="text-lg font-medium mb-2">
@@ -118,6 +171,14 @@ export default function WorkflowCanvas() {
               Drag components from the sidebar or import an existing YAML file
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Selection indicator */}
+      {selectedNode && (
+        <div className="absolute top-4 left-4 bg-white p-2 rounded-lg shadow-md border">
+          <div className="text-xs text-gray-600">Selected:</div>
+          <div className="font-medium text-sm">{selectedNode}</div>
         </div>
       )}
     </div>
