@@ -2,6 +2,8 @@ import type {
   GitHubWorkflow,
   VisualNode,
   VisualEdge,
+  Job,
+  Step,
 } from "../types/github-actions";
 
 /**
@@ -152,9 +154,6 @@ export class WorkflowMapper {
 
     // Process job nodes
     jobNodes.forEach((jobNode) => {
-      const jobData = jobNode.data.job;
-      if (!jobData) return;
-
       const jobId = jobNode.id.replace("job-", "");
 
       // Find steps for this job
@@ -176,13 +175,50 @@ export class WorkflowMapper {
         .map((edge) => edge.source.replace("job-", ""))
         .filter((sourceJobId) => sourceJobId !== jobId);
 
+      // Build job object from node data or fallback to nested job object
+      const existingJobData =
+        (jobNode.data.job as unknown as Record<string, unknown>) || {};
+      const jobData = {
+        ...existingJobData, // Include any other existing properties first
+        // Override with current node data values
+        name: jobNode.data.label as string,
+        "runs-on": (jobNode.data.runsOn as string) || "ubuntu-latest",
+        steps: (existingJobData.steps as Step[]) || [
+          {
+            name: "Checkout code",
+            uses: "actions/checkout@v4",
+          },
+        ],
+      };
+
+      // Add optional properties if they exist
+      const jobConfig: Record<string, unknown> = { ...jobData };
+
+      if (jobNode.data.timeoutMinutes) {
+        jobConfig["timeout-minutes"] = jobNode.data.timeoutMinutes as number;
+      }
+
+      if (jobNode.data.strategy) {
+        jobConfig.strategy = jobNode.data.strategy as string;
+      }
+
+      if (jobNode.data.environment) {
+        jobConfig.environment = jobNode.data.environment as string;
+      }
+
+      if (jobNode.data.permissions) {
+        jobConfig.permissions = jobNode.data.permissions as string;
+      }
+
       workflow.jobs[jobId] = {
-        ...jobData,
-        steps: jobSteps.length > 0 ? jobSteps : jobData.steps,
+        name: jobConfig.name as string,
+        "runs-on": jobConfig["runs-on"] as string,
+        ...jobConfig,
+        steps: jobSteps.length > 0 ? jobSteps : (jobConfig.steps as Step[]),
         ...(needs.length > 0 && {
           needs: needs.length === 1 ? needs[0] : needs,
         }),
-      };
+      } as Job;
     });
 
     return workflow;

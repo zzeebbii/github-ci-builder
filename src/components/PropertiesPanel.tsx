@@ -6,7 +6,15 @@ import JobProperties from "./properties/JobProperties.tsx";
 import StepProperties from "./properties/StepProperties.tsx";
 import WorkflowProperties from "./properties/WorkflowProperties.tsx";
 
-export default function PropertiesPanel() {
+interface PropertiesPanelProps {
+  position?: "left" | "right";
+  onClose?: () => void;
+}
+
+export default function PropertiesPanel({
+  position = "right",
+  onClose,
+}: PropertiesPanelProps) {
   const {
     selectedNode,
     nodes,
@@ -27,9 +35,14 @@ export default function PropertiesPanel() {
   }, [selectedNode, showWorkflowProperties]);
 
   const handleClose = () => {
-    setSelectedNode(null);
-    setShowWorkflowProperties(false);
-    setIsOpen(false);
+    if (position === "left" && onClose) {
+      onClose();
+    } else {
+      // For left panel without onClose, or right panel, clear the selection/workflow state
+      setSelectedNode(null);
+      setShowWorkflowProperties(false);
+      setIsOpen(false);
+    }
   };
 
   const handleUpdateNode = useCallback(
@@ -99,8 +112,14 @@ export default function PropertiesPanel() {
     ? selectedNodeData.data.isValid !== false
     : true;
 
+  // Position-based styling
+  const positionClasses =
+    position === "left"
+      ? "w-full h-full bg-white overflow-hidden" // Remove positioning when used in custom container
+      : "fixed right-0 top-0 h-full w-80 bg-white border-l border-gray-200 shadow-lg z-50 overflow-hidden";
+
   return (
-    <div className="fixed right-0 top-0 h-full w-80 bg-white border-l border-gray-200 shadow-lg z-50 overflow-hidden">
+    <div className={positionClasses}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center gap-2">

@@ -27,7 +27,7 @@ export default function TriggerProperties({
   nodeData,
   onUpdate,
 }: TriggerPropertiesProps) {
-  const { workflow, updateWorkflow } = useWorkflowStore();
+  const { workflow } = useWorkflowStore();
   const [label, setLabel] = useState((nodeData.label as string) || "");
   const [triggers, setTriggers] = useState<WorkflowTriggers>(workflow.on);
 
@@ -125,10 +125,9 @@ export default function TriggerProperties({
       }
 
       setTriggers(newTriggers);
-      // Update the workflow directly
-      updateWorkflow({ on: newTriggers });
+      // The useEffect will handle updating the workflow through onUpdate
     },
-    [triggers, updateWorkflow]
+    [triggers]
   );
 
   const updatePushPullRequestConfig = useCallback(
@@ -143,9 +142,8 @@ export default function TriggerProperties({
         branches,
       };
       setTriggers(newTriggers);
-      updateWorkflow({ on: newTriggers });
     },
-    [triggers, updateWorkflow]
+    [triggers]
   );
 
   const updateScheduleConfig = useCallback(
@@ -153,9 +151,8 @@ export default function TriggerProperties({
       const newTriggers = { ...triggers };
       newTriggers.schedule = [{ cron }];
       setTriggers(newTriggers);
-      updateWorkflow({ on: newTriggers });
     },
-    [triggers, updateWorkflow]
+    [triggers]
   );
 
   const updateReleaseConfig = useCallback(
@@ -163,9 +160,8 @@ export default function TriggerProperties({
       const newTriggers = { ...triggers };
       newTriggers.release = { types } as ReleaseTrigger;
       setTriggers(newTriggers);
-      updateWorkflow({ on: newTriggers });
     },
-    [triggers, updateWorkflow]
+    [triggers]
   );
 
   const getTriggerIcon = (triggerType: string) => {

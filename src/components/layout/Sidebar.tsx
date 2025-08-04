@@ -11,6 +11,8 @@ import {
   Layers,
   Code,
   GripVertical,
+  ChevronLeft,
+  Plus,
 } from "lucide-react";
 
 interface ToolItem {
@@ -25,6 +27,8 @@ interface ToolItem {
 interface SidebarProps {
   selectedTool: string | null;
   onToolSelect: (tool: string | null) => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 const toolCategories = [
@@ -125,7 +129,12 @@ const toolCategories = [
   },
 ];
 
-export default function Sidebar({ selectedTool, onToolSelect }: SidebarProps) {
+export default function Sidebar({
+  selectedTool,
+  onToolSelect,
+  isCollapsed = false,
+  onToggleCollapse,
+}: SidebarProps) {
   const handleDragStart = (
     event: DragEvent<HTMLButtonElement>,
     item: ToolItem
@@ -141,12 +150,63 @@ export default function Sidebar({ selectedTool, onToolSelect }: SidebarProps) {
     event.dataTransfer.effectAllowed = "move";
   };
 
+  if (isCollapsed) {
+    return (
+      <aside className="w-12 bg-white border-r flex flex-col items-center py-4">
+        {/* Toggle Button */}
+        <button
+          onClick={onToggleCollapse}
+          className="p-2 hover:bg-gray-100 rounded-md transition-colors mb-4"
+          title="Expand Components Panel"
+        >
+          <Plus className="w-4 h-4 text-gray-600" />
+        </button>
+
+        {/* Collapsed Icons */}
+        <div className="space-y-2">
+          {toolCategories
+            .flatMap((category) => category.items)
+            .map((item) => {
+              const Icon = item.icon;
+              const isSelected = selectedTool === item.id;
+
+              return (
+                <button
+                  key={item.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, item as ToolItem)}
+                  onClick={() => onToolSelect(isSelected ? null : item.id)}
+                  className={`p-2 rounded-md transition-colors cursor-grab active:cursor-grabbing ${
+                    isSelected
+                      ? "bg-primary-100 text-primary-700"
+                      : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                  }`}
+                  title={item.label}
+                >
+                  <Icon className="w-4 h-4" />
+                </button>
+              );
+            })}
+        </div>
+      </aside>
+    );
+  }
+
   return (
     <aside className="w-64 bg-white border-r overflow-y-auto">
       <div className="p-4">
-        <h2 className="text-sm font-semibold text-gray-900 mb-4">
-          Workflow Components
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-gray-900">
+            Workflow Components
+          </h2>
+          <button
+            onClick={onToggleCollapse}
+            className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+            title="Collapse Components Panel"
+          >
+            <ChevronLeft className="w-4 h-4 text-gray-600" />
+          </button>
+        </div>
 
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center gap-2 text-blue-700 text-xs">
