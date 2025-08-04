@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Download,
   Copy,
@@ -11,16 +11,12 @@ import * as yaml from "js-yaml";
 import { useWorkflowStore } from "../../store/workflow";
 
 export default function ExportView() {
-  const { workflow, isValid, errors, validateWorkflow } = useWorkflowStore();
+  const { workflow, isValid, errors } = useWorkflowStore();
   const [copied, setCopied] = useState(false);
-  const [exportError, setExportError] = useState<string>("");
 
-  // Generate YAML content using js-yaml for proper formatting
-  const generateYAML = () => {
+  // Generate YAML content using useMemo to prevent infinite loops
+  const { yamlContent, yamlError } = useMemo(() => {
     try {
-      // Validate workflow before export
-      validateWorkflow();
-
       // Create clean workflow object with explicit typing
       const cleanWorkflow: Record<string, unknown> = {
         name: workflow.name || "CI",
@@ -44,16 +40,12 @@ export default function ExportView() {
         sortKeys: false,
       });
 
-      setExportError("");
-      return yamlContent;
+      return { yamlContent, yamlError: "" };
     } catch (error) {
       const errorMsg = `Export error: ${(error as Error).message}`;
-      setExportError(errorMsg);
-      return errorMsg;
+      return { yamlContent: errorMsg, yamlError: errorMsg };
     }
-  };
-
-  const yamlContent = generateYAML();
+  }, [workflow]);
 
   const handleCopy = async () => {
     try {
@@ -125,7 +117,7 @@ export default function ExportView() {
             </div>
           )}
 
-          {exportError && (
+          {yamlError && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-red-500" />
@@ -133,7 +125,7 @@ export default function ExportView() {
                   Export Error
                 </span>
               </div>
-              <p className="text-xs text-red-700 mt-1">{exportError}</p>
+              <p className="text-xs text-red-700 mt-1">{yamlError}</p>
             </div>
           )}
 
@@ -141,9 +133,9 @@ export default function ExportView() {
           <div className="flex items-center gap-4">
             <button
               onClick={handleDownload}
-              disabled={!isValid || exportError !== ""}
+              disabled={!isValid || yamlError !== ""}
               className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-md focus:outline-none focus:ring-2 ${
-                isValid && exportError === ""
+                isValid && yamlError === ""
                   ? "text-white bg-blue-600 border-blue-600 hover:bg-blue-700 focus:ring-blue-500"
                   : "text-gray-400 bg-gray-100 border-gray-300 cursor-not-allowed"
               }`}
@@ -154,11 +146,11 @@ export default function ExportView() {
 
             <button
               onClick={handleCopy}
-              disabled={!isValid || exportError !== ""}
+              disabled={!isValid || yamlError !== ""}
               className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-md focus:outline-none focus:ring-2 transition-colors ${
                 copied
                   ? "text-green-700 bg-green-50 border-green-200"
-                  : isValid && exportError === ""
+                  : isValid && yamlError === ""
                   ? "text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:ring-blue-500"
                   : "text-gray-400 bg-gray-100 border-gray-300 cursor-not-allowed"
               }`}
