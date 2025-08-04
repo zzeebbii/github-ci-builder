@@ -3,7 +3,14 @@ import type {
   GitHubWorkflow,
   VisualNode,
   VisualEdge,
+  ValidationResult,
 } from "../types/github-actions";
+import { validateGitHubWorkflow } from "../utils/github-actions-validator";
+import {
+  WorkflowMapper,
+  workflowToVisual,
+  visualToWorkflow,
+} from "../utils/workflow-mapper";
 
 interface WorkflowState {
   // Workflow data
@@ -15,10 +22,15 @@ interface WorkflowState {
   selectedNode: string | null;
   isValid: boolean;
   errors: string[];
+  validationResult: ValidationResult | null;
 
   // Actions
   setWorkflow: (workflow: GitHubWorkflow) => void;
   updateWorkflow: (updates: Partial<GitHubWorkflow>) => void;
+  importFromYaml: (yamlContent: string) => void;
+  exportToYaml: () => string;
+  syncFromVisual: () => void;
+  syncToVisual: () => void;
   addNode: (node: VisualNode) => void;
   updateNode: (id: string, updates: Partial<VisualNode>) => void;
   removeNode: (id: string) => void;
@@ -27,6 +39,7 @@ interface WorkflowState {
   setSelectedNode: (id: string | null) => void;
   validateWorkflow: () => void;
   clearWorkflow: () => void;
+  resetToDefault: () => void;
 }
 
 // Default workflow structure
@@ -61,10 +74,12 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   selectedNode: null,
   isValid: true,
   errors: [],
+  validationResult: null,
 
   // Actions
   setWorkflow: (workflow) => {
     set({ workflow });
+    get().syncToVisual();
     get().validateWorkflow();
   },
 
@@ -75,10 +90,46 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     get().validateWorkflow();
   },
 
+  importFromYaml: (yamlContent) => {
+    try {
+      // This would use a YAML parser like js-yaml
+      // For now, we'll assume the workflow is provided as a JSON string
+      const workflow = JSON.parse(yamlContent) as GitHubWorkflow;
+      get().setWorkflow(workflow);
+    } catch {
+      set({
+        errors: ["Failed to parse YAML content"],
+        isValid: false,
+      });
+    }
+  },
+
+  exportToYaml: () => {
+    const { workflow } = get();
+    // This would use a YAML serializer
+    // For now, return JSON string
+    return JSON.stringify(workflow, null, 2);
+  },
+
+  syncFromVisual: () => {
+    const { nodes, edges } = get();
+    const workflow = visualToWorkflow(nodes, edges);
+    set({ workflow });
+    get().validateWorkflow();
+  },
+
+  syncToVisual: () => {
+    const { workflow } = get();
+    const { nodes, edges } = workflowToVisual(workflow);
+    const optimizedNodes = WorkflowMapper.optimizeNodeLayout(nodes);
+    set({ nodes: optimizedNodes, edges });
+  },
+
   addNode: (node) => {
     set((state) => ({
       nodes: [...state.nodes, node],
     }));
+    get().syncFromVisual();
   },
 
   updateNode: (id, updates) => {
@@ -87,6 +138,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         node.id === id ? { ...node, ...updates } : node
       ),
     }));
+    get().syncFromVisual();
   },
 
   removeNode: (id) => {
@@ -97,18 +149,21 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       ),
       selectedNode: state.selectedNode === id ? null : state.selectedNode,
     }));
+    get().syncFromVisual();
   },
 
   addEdge: (edge) => {
     set((state) => ({
       edges: [...state.edges, edge],
     }));
+    get().syncFromVisual();
   },
 
   removeEdge: (id) => {
     set((state) => ({
       edges: state.edges.filter((edge) => edge.id !== id),
     }));
+    get().syncFromVisual();
   },
 
   setSelectedNode: (id) => {
@@ -117,56 +172,37 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   validateWorkflow: () => {
     const { workflow } = get();
-    const errors: string[] = [];
-
-    // Basic validation
-    if (!workflow.name) {
-      errors.push("Workflow name is required");
-    }
-
-    if (!workflow.on || Object.keys(workflow.on).length === 0) {
-      errors.push("At least one trigger is required");
-    }
-
-    if (!workflow.jobs || Object.keys(workflow.jobs).length === 0) {
-      errors.push("At least one job is required");
-    }
-
-    // Validate jobs
-    Object.entries(workflow.jobs).forEach(([jobId, job]) => {
-      if (!job["runs-on"]) {
-        errors.push(`Job '${jobId}' must specify runs-on`);
-      }
-
-      if (!job.steps || job.steps.length === 0) {
-        errors.push(`Job '${jobId}' must have at least one step`);
-      }
-
-      job.steps.forEach((step, index) => {
-        if (!step.name && !step.uses && !step.run) {
-          errors.push(
-            `Step ${
-              index + 1
-            } in job '${jobId}' must have a name, uses, or run property`
-          );
-        }
-      });
-    });
+    const validationResult = validateGitHubWorkflow(workflow);
 
     set({
-      isValid: errors.length === 0,
-      errors,
+      validationResult,
+      isValid: validationResult.isValid,
+      errors: validationResult.errors.map(
+        (error) => `${error.path}: ${error.message}`
+      ),
     });
   },
 
   clearWorkflow: () => {
     set({
-      workflow: defaultWorkflow,
+      workflow: { name: "", on: {}, jobs: {} },
       nodes: [],
       edges: [],
       selectedNode: null,
+      isValid: false,
+      errors: [],
+      validationResult: null,
+    });
+  },
+
+  resetToDefault: () => {
+    set({
+      workflow: defaultWorkflow,
+      selectedNode: null,
       isValid: true,
       errors: [],
+      validationResult: null,
     });
+    get().syncToVisual();
   },
 }));
