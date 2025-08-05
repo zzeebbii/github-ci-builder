@@ -531,7 +531,7 @@ export function getActionsByCategory(
   category: ActionCategory
 ): PopularAction[] {
   return ENHANCED_POPULAR_ACTIONS.filter(
-    (action) => action.category === category
+    action => action.category === category
   );
 }
 
@@ -541,7 +541,7 @@ export function getActionsByCategory(
 export function searchActions(query: string): PopularAction[] {
   const lowercaseQuery = query.toLowerCase();
   return ENHANCED_POPULAR_ACTIONS.filter(
-    (action) =>
+    action =>
       action.name.toLowerCase().includes(lowercaseQuery) ||
       action.description.toLowerCase().includes(lowercaseQuery) ||
       action.uses.toLowerCase().includes(lowercaseQuery)
@@ -552,7 +552,7 @@ export function searchActions(query: string): PopularAction[] {
  * Get action details by uses string
  */
 export function getActionDetails(uses: string): PopularAction | undefined {
-  return ENHANCED_POPULAR_ACTIONS.find((action) => action.uses === uses);
+  return ENHANCED_POPULAR_ACTIONS.find(action => action.uses === uses);
 }
 
 /**
@@ -776,7 +776,7 @@ export function getJobTemplatesByCategory(
   category: NodeTemplateCategory
 ): NodeTemplate[] {
   return ENHANCED_JOB_TEMPLATES.filter(
-    (template) => template.category === category
+    template => template.category === category
   );
 }
 
@@ -901,8 +901,8 @@ export const ENHANCED_STEP_TEMPLATES: NodeTemplate[] = [
  * Create a step from template
  */
 export function createStepFromTemplate(templateId: string): Step | null {
-  const template = ENHANCED_STEP_TEMPLATES.find((t) => t.id === templateId);
-  if (!template || !template.template) return null;
+  const template = ENHANCED_STEP_TEMPLATES.find(t => t.id === templateId);
+  if (!template || !template.template) {return null;}
 
   return template.template as Step;
 }
@@ -911,8 +911,8 @@ export function createStepFromTemplate(templateId: string): Step | null {
  * Create a job from template
  */
 export function createJobFromTemplate(templateId: string): Job | null {
-  const template = ENHANCED_JOB_TEMPLATES.find((t) => t.id === templateId);
-  if (!template || !template.template) return null;
+  const template = ENHANCED_JOB_TEMPLATES.find(t => t.id === templateId);
+  if (!template || !template.template) {return null;}
 
   return template.template as Job;
 }
@@ -925,12 +925,12 @@ export function getAllCategories(): {
   template: NodeTemplateCategory[];
 } {
   const actionCategories = Array.from(
-    new Set(ENHANCED_POPULAR_ACTIONS.map((a) => a.category))
+    new Set(ENHANCED_POPULAR_ACTIONS.map(a => a.category))
   );
   const templateCategories = Array.from(
     new Set(
       [...ENHANCED_JOB_TEMPLATES, ...ENHANCED_STEP_TEMPLATES].map(
-        (t) => t.category
+        t => t.category
       )
     )
   );

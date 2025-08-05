@@ -26,8 +26,8 @@ function TriggerNode({
   selected,
   id,
 }: NodeProps & { data: TriggerNodeData }) {
-  const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
-  
+  const setSelectedNode = useWorkflowStore(state => state.setSelectedNode);
+
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     if (id) {
@@ -81,7 +81,7 @@ function TriggerNode({
   // Get active triggers from the triggers object
   const activeTriggers = data.triggers
     ? Object.keys(data.triggers).filter(
-        (key) => data.triggers![key as keyof WorkflowTriggers]
+        key => data.triggers![key as keyof WorkflowTriggers]
       )
     : [data.triggerType];
 
@@ -105,7 +105,7 @@ function TriggerNode({
       {/* Display all active triggers */}
       <div className="space-y-1">
         {activeTriggers.length > 0 ? (
-          activeTriggers.map((trigger) => (
+          activeTriggers.map(trigger => (
             <div key={trigger} className="flex items-center gap-2 text-xs">
               {getTriggerIcon(trigger)}
               <span className="text-blue-100">

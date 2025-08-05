@@ -146,12 +146,12 @@ export default function ImportView() {
               dragActive
                 ? "border-blue-400 bg-blue-50"
                 : importStatus === "error"
-                ? "border-red-300 bg-red-50"
-                : importStatus === "success"
-                ? "border-green-300 bg-green-50"
-                : importStatus === "parsing"
-                ? "border-yellow-300 bg-yellow-50"
-                : "border-gray-300 bg-white hover:border-gray-400"
+                  ? "border-red-300 bg-red-50"
+                  : importStatus === "success"
+                    ? "border-green-300 bg-green-50"
+                    : importStatus === "parsing"
+                      ? "border-yellow-300 bg-yellow-50"
+                      : "border-gray-300 bg-white hover:border-gray-400"
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -181,16 +181,16 @@ export default function ImportView() {
                   {importStatus === "success"
                     ? "File loaded successfully!"
                     : importStatus === "parsing"
-                    ? "Parsing YAML file..."
-                    : "Drop your YAML file here"}
+                      ? "Parsing YAML file..."
+                      : "Drop your YAML file here"}
                 </h3>
 
                 <p className="text-gray-600 mt-1">
                   {importStatus === "success"
                     ? `Loaded: ${fileName}`
                     : importStatus === "parsing"
-                    ? "Validating workflow structure..."
-                    : "or click to browse and select a .yml or .yaml file"}
+                      ? "Validating workflow structure..."
+                      : "or click to browse and select a .yml or .yaml file"}
                 </p>
 
                 {importStatus === "error" && (

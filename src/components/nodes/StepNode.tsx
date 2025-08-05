@@ -15,7 +15,7 @@ interface StepNodeData {
 function StepNode({ data, selected, id }: NodeProps & { data: StepNodeData }) {
   const hasErrors = data.errors && data.errors.length > 0;
   const isValid = data.isValid !== false;
-  const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
+  const setSelectedNode = useWorkflowStore(state => state.setSelectedNode);
 
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();

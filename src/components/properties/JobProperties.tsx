@@ -36,19 +36,19 @@ export default function JobProperties({
   }, [nodeData]);
 
   const validateJob = useCallback(() => {
-    if (!label.trim()) return false;
-    if (!runsOn.trim()) return false;
-    if (timeoutMinutes <= 0 || timeoutMinutes > 2160) return false;
+    if (!label.trim()) {return false;}
+    if (!runsOn.trim()) {return false;}
+    if (timeoutMinutes <= 0 || timeoutMinutes > 2160) {return false;}
     return true;
   }, [label, runsOn, timeoutMinutes]);
 
   const getValidationErrors = useCallback(() => {
     const errors = [];
-    if (!label.trim()) errors.push("Job name is required");
-    if (!runsOn.trim()) errors.push("Runner is required");
-    if (timeoutMinutes <= 0) errors.push("Timeout must be greater than 0");
+    if (!label.trim()) {errors.push("Job name is required");}
+    if (!runsOn.trim()) {errors.push("Runner is required");}
+    if (timeoutMinutes <= 0) {errors.push("Timeout must be greater than 0");}
     if (timeoutMinutes > 2160)
-      errors.push("Timeout cannot exceed 2160 minutes (36 hours)");
+      {errors.push("Timeout cannot exceed 2160 minutes (36 hours)");}
     return errors;
   }, [label, runsOn, timeoutMinutes]);
 
@@ -105,7 +105,7 @@ export default function JobProperties({
         <input
           type="text"
           value={label}
-          onChange={(e) => setLabel(e.target.value)}
+          onChange={e => setLabel(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
           placeholder="Enter job name"
         />
@@ -121,10 +121,10 @@ export default function JobProperties({
         </label>
         <select
           value={runsOn}
-          onChange={(e) => setRunsOn(e.target.value)}
+          onChange={e => setRunsOn(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
         >
-          {getRunnerOptions().map((option) => (
+          {getRunnerOptions().map(option => (
             <option key={option.value} value={option.value}>
               {option.label} - {option.description}
             </option>
@@ -146,7 +146,7 @@ export default function JobProperties({
         <input
           type="number"
           value={timeoutMinutes}
-          onChange={(e) => setTimeoutMinutes(parseInt(e.target.value) || 360)}
+          onChange={e => setTimeoutMinutes(parseInt(e.target.value) || 360)}
           min="1"
           max="2160"
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
@@ -166,7 +166,7 @@ export default function JobProperties({
         </label>
         <select
           value={strategy}
-          onChange={(e) => setStrategy(e.target.value)}
+          onChange={e => setStrategy(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
         >
           <option value="">None</option>
@@ -186,7 +186,7 @@ export default function JobProperties({
         <input
           type="text"
           value={environment}
-          onChange={(e) => setEnvironment(e.target.value)}
+          onChange={e => setEnvironment(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
           placeholder="production, staging, development"
         />
@@ -205,7 +205,7 @@ export default function JobProperties({
         </label>
         <select
           value={permissions}
-          onChange={(e) => setPermissions(e.target.value)}
+          onChange={e => setPermissions(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
         >
           <option value="">Default</option>

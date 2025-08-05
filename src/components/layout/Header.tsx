@@ -24,7 +24,7 @@ export default function Header() {
 
             {/* Navigation */}
             <nav className="flex items-center gap-1">
-              {navigation.map((item) => {
+              {navigation.map(item => {
                 const isActive = location.pathname === item.href;
 
                 return (
@@ -66,7 +66,7 @@ export default function Header() {
       {/* Breadcrumb */}
       <div className="px-6 py-2 bg-gray-50 border-t">
         <div className="text-sm text-gray-600">
-          {navigation.find((item) => item.href === location.pathname)
+          {navigation.find(item => item.href === location.pathname)
             ?.description || "GitHub Actions workflow builder"}
         </div>
       </div>

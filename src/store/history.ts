@@ -48,8 +48,8 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
   currentIndex: -1,
   maxHistorySize: 50,
 
-  addAction: (action) => {
-    set((state) => {
+  addAction: action => {
+    set(state => {
       const newAction: HistoryAction = {
         ...action,
         id: `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,

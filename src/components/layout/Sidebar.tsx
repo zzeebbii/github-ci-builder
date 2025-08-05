@@ -165,8 +165,8 @@ export default function Sidebar({
         {/* Collapsed Icons */}
         <div className="space-y-2">
           {toolCategories
-            .flatMap((category) => category.items)
-            .map((item) => {
+            .flatMap(category => category.items)
+            .map(item => {
               const Icon = item.icon;
               const isSelected = selectedTool === item.id;
 
@@ -174,7 +174,7 @@ export default function Sidebar({
                 <button
                   key={item.id}
                   draggable
-                  onDragStart={(e) => handleDragStart(e, item as ToolItem)}
+                  onDragStart={e => handleDragStart(e, item as ToolItem)}
                   onClick={() => onToolSelect(isSelected ? null : item.id)}
                   className={`p-2 rounded-md transition-colors cursor-grab active:cursor-grabbing ${
                     isSelected
@@ -216,14 +216,14 @@ export default function Sidebar({
         </div>
 
         <div className="space-y-6">
-          {toolCategories.map((category) => (
+          {toolCategories.map(category => (
             <div key={category.title}>
               <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
                 {category.title}
               </h3>
 
               <div className="space-y-1">
-                {category.items.map((item) => {
+                {category.items.map(item => {
                   const Icon = item.icon;
                   const isSelected = selectedTool === item.id;
 
@@ -231,7 +231,7 @@ export default function Sidebar({
                     <button
                       key={item.id}
                       draggable
-                      onDragStart={(e) => handleDragStart(e, item as ToolItem)}
+                      onDragStart={e => handleDragStart(e, item as ToolItem)}
                       onClick={() => onToolSelect(isSelected ? null : item.id)}
                       className={`w-full text-left p-3 rounded-lg border transition-colors cursor-grab active:cursor-grabbing ${
                         isSelected

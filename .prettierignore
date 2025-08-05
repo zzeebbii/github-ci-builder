@@ -1,0 +1,26 @@
+# Build outputs
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Generated files
+*.min.js
+*.min.css
+
+# Config files that shouldn't be formatted
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Version control
+.git/
+
+# IDE files
+.idea/

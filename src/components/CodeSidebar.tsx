@@ -28,32 +28,36 @@ export default function CodeSidebar({ isVisible, onToggle }: CodeSidebarProps) {
     try {
       // Create clean workflow object with proper property ordering
       const cleanWorkflow: Record<string, unknown> = {};
-      
+
       // Add name
       cleanWorkflow.name = workflow.name || "CI";
-      
+
       // Add run-name if it exists
       if (workflow["run-name"]) {
         cleanWorkflow["run-name"] = workflow["run-name"];
       }
-      
+
       // Add triggers
       cleanWorkflow.on = workflow.on || { push: { branches: ["main"] } };
-      
+
       // Add env if it exists
       if (workflow.env && Object.keys(workflow.env).length > 0) {
         cleanWorkflow.env = workflow.env;
       }
-      
+
       // Add permissions if they exist
-      if (workflow.permissions && Object.keys(workflow.permissions).length > 0) {
+      if (
+        workflow.permissions &&
+        Object.keys(workflow.permissions).length > 0
+      ) {
         cleanWorkflow.permissions = workflow.permissions;
       }
-      
+
       // Add other properties if they exist
-      if (workflow.defaults) cleanWorkflow.defaults = workflow.defaults;
-      if (workflow.concurrency) cleanWorkflow.concurrency = workflow.concurrency;
-      
+      if (workflow.defaults) {cleanWorkflow.defaults = workflow.defaults;}
+      if (workflow.concurrency)
+        {cleanWorkflow.concurrency = workflow.concurrency;}
+
       // Add jobs
       cleanWorkflow.jobs = workflow.jobs || {};
 
@@ -195,8 +199,8 @@ export default function CodeSidebar({ isVisible, onToggle }: CodeSidebarProps) {
             copied
               ? "text-green-700 bg-green-50 border border-green-200"
               : yamlError === ""
-              ? "text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 hover:border-gray-400 focus:ring-2 focus:ring-blue-500"
-              : "text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed"
+                ? "text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 hover:border-gray-400 focus:ring-2 focus:ring-blue-500"
+                : "text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed"
           }`}
         >
           {copied ? (

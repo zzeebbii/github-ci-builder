@@ -62,9 +62,7 @@ export default function TriggerProperties({
           newLabel = `On ${key.replace(/_/g, " ")}`;
       }
     } else if (triggerKeys.length <= 3) {
-      newLabel = `On ${triggerKeys
-        .map((k) => k.replace(/_/g, " "))
-        .join(", ")}`;
+      newLabel = `On ${triggerKeys.map(k => k.replace(/_/g, " ")).join(", ")}`;
     } else {
       newLabel = `Multiple Triggers (${triggerKeys.length})`;
     }
@@ -221,7 +219,7 @@ export default function TriggerProperties({
         <input
           type="text"
           value={label}
-          onChange={(e) => setLabel(e.target.value)}
+          onChange={e => setLabel(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           placeholder="Enter trigger node label"
         />
@@ -241,7 +239,7 @@ export default function TriggerProperties({
             { key: "schedule", label: "Scheduled" },
             { key: "release", label: "Release" },
             { key: "issues", label: "Issues" },
-          ].map((trigger) => (
+          ].map(trigger => (
             <div key={trigger.key} className="border rounded-lg p-3">
               <label className="flex items-center space-x-3">
                 <input
@@ -287,10 +285,10 @@ export default function TriggerProperties({
                               ).branches!.join(", ")
                             : "main"
                         }
-                        onChange={(e) => {
+                        onChange={e => {
                           const branches = e.target.value
                             .split(",")
-                            .map((b) => b.trim())
+                            .map(b => b.trim())
                             .filter(Boolean);
                           updatePushPullRequestConfig(
                             trigger.key as "push" | "pull_request",
@@ -316,7 +314,7 @@ export default function TriggerProperties({
                             ? triggers.schedule[0]?.cron || "0 0 * * *"
                             : "0 0 * * *"
                         }
-                        onChange={(e) => {
+                        onChange={e => {
                           updateScheduleConfig(e.target.value);
                         }}
                         className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -343,7 +341,7 @@ export default function TriggerProperties({
                             ? (triggers.release as ReleaseTrigger).types![0]
                             : "published"
                         }
-                        onChange={(e) => {
+                        onChange={e => {
                           updateReleaseConfig([e.target.value]);
                         }}
                         className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"

@@ -26,12 +26,12 @@ export default function ExportView() {
 
       // Add additional properties if they exist on the workflow
       const workflowAny = workflow as unknown as Record<string, unknown>;
-      if (workflowAny.env) cleanWorkflow.env = workflowAny.env;
-      if (workflowAny.defaults) cleanWorkflow.defaults = workflowAny.defaults;
+      if (workflowAny.env) {cleanWorkflow.env = workflowAny.env;}
+      if (workflowAny.defaults) {cleanWorkflow.defaults = workflowAny.defaults;}
       if (workflowAny.concurrency)
-        cleanWorkflow.concurrency = workflowAny.concurrency;
+        {cleanWorkflow.concurrency = workflowAny.concurrency;}
       if (workflowAny.permissions)
-        cleanWorkflow.permissions = workflowAny.permissions;
+        {cleanWorkflow.permissions = workflowAny.permissions;}
 
       const yamlContent = yaml.dump(cleanWorkflow, {
         indent: 2,
@@ -151,8 +151,8 @@ export default function ExportView() {
                 copied
                   ? "text-green-700 bg-green-50 border-green-200"
                   : isValid && yamlError === ""
-                  ? "text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:ring-blue-500"
-                  : "text-gray-400 bg-gray-100 border-gray-300 cursor-not-allowed"
+                    ? "text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:ring-blue-500"
+                    : "text-gray-400 bg-gray-100 border-gray-300 cursor-not-allowed"
               }`}
             >
               {copied ? (

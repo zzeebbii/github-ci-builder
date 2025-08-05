@@ -168,8 +168,8 @@ export default function HistoryPanel({
                         isCurrentIndex
                           ? "bg-blue-100 border border-blue-200"
                           : isFutureAction
-                          ? "bg-gray-50 opacity-60 hover:opacity-80"
-                          : "hover:bg-gray-100"
+                            ? "bg-gray-50 opacity-60 hover:opacity-80"
+                            : "hover:bg-gray-100"
                       }`}
                       onClick={() => handleJumpToAction(index)}
                     >

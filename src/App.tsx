@@ -7,7 +7,7 @@ import { useWorkflowStore } from "./store/workflow";
 
 function App() {
   const { toasts, removeToast } = useWorkflowStore();
-  
+
   // Get the base path for routing (for GitHub Pages deployment)
   const basename = import.meta.env.BASE_URL;
 

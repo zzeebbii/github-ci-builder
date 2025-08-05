@@ -10,23 +10,27 @@ A powerful visual drag-and-drop workflow designer for GitHub Actions. Design wor
 ## ✨ Features
 
 ### 🎨 **Visual Workflow Designer**
+
 - **Drag-and-drop interface** with intuitive node-based design
 - **Real-time visual feedback** with animated edges and connections
 - **Smart auto-layout** with waterfall positioning and dependency-aware ordering
 - **Interactive edge animations** to visualize job relationships
 
 ### 🔄 **Bidirectional Conversion**
+
 - **YAML to Visual**: Import existing GitHub Actions workflows and render them visually
 - **Visual to YAML**: Export your visual designs as valid GitHub Actions YAML
 - **Real-time preview** with Monaco Editor integration
 
 ### 🎯 **Intelligent Features**
+
 - **Schema validation** with real-time GitHub Actions rule checking
 - **Connection validation** to prevent invalid workflow structures
 - **Auto-complete** with 300+ popular GitHub Actions
 - **Property panels** for configuring triggers, jobs, and steps
 
 ### 🛠️ **Developer Experience**
+
 - **Undo/redo system** with visual history tracking
 - **Collapsible sidebars** for optimal workspace usage
 - **Keyboard shortcuts** for efficient workflow building
@@ -35,7 +39,8 @@ A powerful visual drag-and-drop workflow designer for GitHub Actions. Design wor
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - npm or yarn
 
 ### Installation
@@ -67,17 +72,21 @@ npm run preview
 ## 🎯 How It Works
 
 ### 1. **Start with Templates**
+
 Choose from pre-built workflow templates or start from scratch:
+
 - 🚀 **Default CI/CD Pipeline**: Full-featured workflow with testing, linting, building, and deployment
 - ✨ **Simple Workflow**: Minimal setup for basic CI/CD needs
 
 ### 2. **Design Visually**
+
 - **Drag nodes** from the sidebar (Triggers, Jobs, Steps)
 - **Connect nodes** to define dependencies and flow
 - **Configure properties** using the automated properties panel
 - **See real-time validation** with visual error indicators
 
 ### 3. **Workflow Structure**
+
 ```
 🎯 Triggers (push, PR, manual, schedule)
     ↓
@@ -87,6 +96,7 @@ Choose from pre-built workflow templates or start from scratch:
 ```
 
 ### 4. **Export & Use**
+
 - **Copy YAML** directly from the code editor
 - **Download** as `.yml` file
 - **Import existing** workflows to modify visually
@@ -94,6 +104,7 @@ Choose from pre-built workflow templates or start from scratch:
 ## 🏗️ Architecture
 
 ### Tech Stack
+
 - **Frontend**: React 18+ with TypeScript (strict mode)
 - **Build Tool**: Vite 7.0.6 with HMR
 - **Styling**: Tailwind CSS with responsive design
@@ -104,6 +115,7 @@ Choose from pre-built workflow templates or start from scratch:
 - **Icons**: Lucide React with consistent design system
 
 ### Key Components
+
 ```
 src/
 ├── components/
@@ -124,17 +136,20 @@ src/
 ## 🎨 Visual Design Features
 
 ### Node Types
+
 - **🎯 Trigger Nodes**: Workflow triggers (push, PR, schedule, manual)
 - **🏗️ Job Nodes**: Individual jobs with runner configuration
 - **📋 Step Nodes**: Individual steps within jobs
 
 ### Smart Layout
+
 - **Dependency-aware ordering**: Independent jobs first, dependent jobs follow
 - **Waterfall layout**: Steps cascade cleanly under their parent jobs
 - **Center alignment**: Professional visual hierarchy
 - **Optimal spacing**: 120px step spacing, 400px job spacing
 
 ### Interactive Features
+
 - **Click job nodes** to animate connected edges
 - **Exclusive selection** - only one job's edges animate at a time
 - **Color-coded connections**:
@@ -146,6 +161,7 @@ src/
 ## 📚 Example Workflows
 
 ### Simple CI/CD Pipeline
+
 ```yaml
 name: 🚀 CI/CD Pipeline
 on:
@@ -161,7 +177,7 @@ jobs:
     # ... steps
 
   lint:
-    name: ✨ Code Quality  
+    name: ✨ Code Quality
     runs-on: ubuntu-latest
     # ... steps
 
@@ -179,6 +195,7 @@ jobs:
 ## 🛠️ Development
 
 ### Getting Started
+
 ```bash
 # Install dependencies
 npm install
@@ -194,11 +211,13 @@ npm run lint
 ```
 
 ### Project Structure
+
 - See `PROJECT_CONTEXT.md` for comprehensive documentation
 - See `DEVELOPMENT_GUIDE.md` for development instructions
 - All major components are documented with TypeScript interfaces
 
 ### Contributing
+
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes and test thoroughly
@@ -209,6 +228,7 @@ npm run lint
 ## 📋 Roadmap
 
 ### Current Features ✅
+
 - [x] Visual workflow designer with drag-and-drop
 - [x] Bidirectional YAML ↔ Visual conversion
 - [x] Real-time validation and error checking
@@ -219,6 +239,7 @@ npm run lint
 - [x] Template system with default workflows
 
 ### Upcoming Features 🚧
+
 - [ ] Workflow template gallery
 - [ ] Advanced validation rules
 - [ ] Collaboration features
@@ -248,4 +269,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ for the GitHub Actions community**
 
-*Transform your CI/CD workflows from code to visual and back again!* 🚀
+_Transform your CI/CD workflows from code to visual and back again!_ 🚀

@@ -48,13 +48,13 @@ export class GitHubActionsValidator {
       Object.entries(workflow.jobs).forEach(([jobId, job]) => {
         const jobValidation = this.validateJob(job, jobId);
         errors.push(
-          ...jobValidation.errors.map((error) => ({
+          ...jobValidation.errors.map(error => ({
             ...error,
             path: `jobs.${jobId}.${error.path}`,
           }))
         );
         warnings.push(
-          ...jobValidation.warnings.map((warning) => ({
+          ...jobValidation.warnings.map(warning => ({
             ...warning,
             path: `jobs.${jobId}.${warning.path}`,
           }))
@@ -93,7 +93,7 @@ export class GitHubActionsValidator {
     }
 
     // Check for unknown trigger events
-    Object.keys(triggers).forEach((trigger) => {
+    Object.keys(triggers).forEach(trigger => {
       if (!WORKFLOW_EVENT_TRIGGERS.includes(trigger as WorkflowEventTrigger)) {
         warnings.push({
           path: `on.${trigger}`,
@@ -176,13 +176,13 @@ export class GitHubActionsValidator {
       job.steps.forEach((step, index) => {
         const stepValidation = this.validateStep(step);
         errors.push(
-          ...stepValidation.errors.map((error) => ({
+          ...stepValidation.errors.map(error => ({
             ...error,
             path: `steps[${index}].${error.path}`,
           }))
         );
         warnings.push(
-          ...stepValidation.warnings.map((warning) => ({
+          ...stepValidation.warnings.map(warning => ({
             ...warning,
             path: `steps[${index}].${warning.path}`,
           }))
@@ -206,13 +206,13 @@ export class GitHubActionsValidator {
     if (job.strategy?.matrix) {
       const matrixValidation = this.validateMatrix(job.strategy.matrix);
       errors.push(
-        ...matrixValidation.errors.map((error) => ({
+        ...matrixValidation.errors.map(error => ({
           ...error,
           path: `strategy.matrix.${error.path}`,
         }))
       );
       warnings.push(
-        ...matrixValidation.warnings.map((warning) => ({
+        ...matrixValidation.warnings.map(warning => ({
           ...warning,
           path: `strategy.matrix.${warning.path}`,
         }))
@@ -305,7 +305,7 @@ export class GitHubActionsValidator {
     Object.entries(jobs).forEach(([jobId, job]) => {
       if (job.needs) {
         const dependencies = Array.isArray(job.needs) ? job.needs : [job.needs];
-        dependencies.forEach((dependency) => {
+        dependencies.forEach(dependency => {
           if (!jobIds.includes(dependency)) {
             errors.push({
               path: `jobs.${jobId}.needs`,
@@ -420,10 +420,10 @@ export class GitHubActionsValidator {
     // Count total matrix combinations
     let totalCombinations = 1;
     const matrixKeys = Object.keys(matrix).filter(
-      (key) => key !== "include" && key !== "exclude"
+      key => key !== "include" && key !== "exclude"
     );
 
-    matrixKeys.forEach((key) => {
+    matrixKeys.forEach(key => {
       const values = matrix[key];
       if (Array.isArray(values)) {
         totalCombinations *= values.length;

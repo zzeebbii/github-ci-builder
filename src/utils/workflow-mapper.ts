@@ -74,7 +74,7 @@ export class WorkflowMapper {
     const jobsWithoutDependencies: string[] = [];
     const jobsWithDependencies: string[] = [];
 
-    jobIds.forEach((jobId) => {
+    jobIds.forEach(jobId => {
       const job = workflow.jobs[jobId];
       if (
         job.needs &&
@@ -90,7 +90,7 @@ export class WorkflowMapper {
     const orderedJobIds = [...jobsWithoutDependencies, ...jobsWithDependencies];
     const jobNodeMap = new Map<string, string>(); // jobId -> nodeId
 
-    orderedJobIds.forEach((jobId) => {
+    orderedJobIds.forEach(jobId => {
       const job = workflow.jobs[jobId];
       const nodeId = `job-${jobId}`;
       jobNodeMap.set(jobId, nodeId);
@@ -170,13 +170,13 @@ export class WorkflowMapper {
     });
 
     // Create job dependency edges
-    orderedJobIds.forEach((jobId) => {
+    orderedJobIds.forEach(jobId => {
       const job = workflow.jobs[jobId];
       const targetNodeId = jobNodeMap.get(jobId)!;
 
       if (job.needs) {
         const dependencies = Array.isArray(job.needs) ? job.needs : [job.needs];
-        dependencies.forEach((dependency) => {
+        dependencies.forEach(dependency => {
           const sourceNodeId = jobNodeMap.get(dependency);
           if (sourceNodeId) {
             edges.push({
@@ -231,8 +231,8 @@ export class WorkflowMapper {
     });
 
     // Reposition trigger nodes to be centered relative to all jobs
-    const jobNodes = nodes.filter((n) => n.type === "job");
-    const triggerNodes = nodes.filter((n) => n.type === "trigger");
+    const jobNodes = nodes.filter(n => n.type === "job");
+    const triggerNodes = nodes.filter(n => n.type === "trigger");
 
     if (jobNodes.length > 0 && triggerNodes.length > 0) {
       const firstJobX = jobNodes[0].position.x;
@@ -257,9 +257,9 @@ export class WorkflowMapper {
     nodes: VisualNode[],
     edges: VisualEdge[]
   ): GitHubWorkflow {
-    const triggerNode = nodes.find((node) => node.type === "trigger");
-    const jobNodes = nodes.filter((node) => node.type === "job");
-    const stepNodes = nodes.filter((node) => node.type === "step");
+    const triggerNode = nodes.find(node => node.type === "trigger");
+    const jobNodes = nodes.filter(node => node.type === "job");
+    const stepNodes = nodes.filter(node => node.type === "step");
 
     // Build workflow structure
     const workflow: GitHubWorkflow = {
@@ -269,27 +269,27 @@ export class WorkflowMapper {
     };
 
     // Process job nodes
-    jobNodes.forEach((jobNode) => {
+    jobNodes.forEach(jobNode => {
       const jobId = jobNode.id.replace("job-", "");
 
       // Find steps for this job
       const jobSteps = stepNodes
-        .filter((stepNode) => stepNode.id.startsWith(`${jobNode.id}-step-`))
+        .filter(stepNode => stepNode.id.startsWith(`${jobNode.id}-step-`))
         .sort((a, b) => {
           const aIndex = parseInt(a.id.split("-step-")[1]);
           const bIndex = parseInt(b.id.split("-step-")[1]);
           return aIndex - bIndex;
         })
-        .map((stepNode) => stepNode.data.step!)
+        .map(stepNode => stepNode.data.step!)
         .filter(Boolean);
 
       // Find job dependencies
       const dependencyEdges = edges.filter(
-        (edge) => edge.target === jobNode.id && edge.source !== "trigger"
+        edge => edge.target === jobNode.id && edge.source !== "trigger"
       );
       const needs = dependencyEdges
-        .map((edge) => edge.source.replace("job-", ""))
-        .filter((sourceJobId) => sourceJobId !== jobId);
+        .map(edge => edge.source.replace("job-", ""))
+        .filter(sourceJobId => sourceJobId !== jobId);
 
       // Build job object from node data or fallback to nested job object
       const existingJobData =
@@ -365,7 +365,7 @@ export class WorkflowMapper {
     }
 
     if (triggerKeys.length <= 3) {
-      return `On ${triggerKeys.map((k) => k.replace(/_/g, " ")).join(", ")}`;
+      return `On ${triggerKeys.map(k => k.replace(/_/g, " ")).join(", ")}`;
     }
 
     return `Multiple Triggers (${triggerKeys.length})`;
@@ -465,9 +465,9 @@ export class WorkflowMapper {
    */
   static applyWaterfallLayout(nodes: VisualNode[]): VisualNode[] {
     const layoutNodes = [...nodes];
-    const jobNodes = layoutNodes.filter((n) => n.type === "job");
-    const stepNodes = layoutNodes.filter((n) => n.type === "step");
-    const triggerNodes = layoutNodes.filter((n) => n.type === "trigger");
+    const jobNodes = layoutNodes.filter(n => n.type === "job");
+    const stepNodes = layoutNodes.filter(n => n.type === "step");
+    const triggerNodes = layoutNodes.filter(n => n.type === "trigger");
 
     // Layout constants - improved spacing for better edge visibility
     let currentJobX = 150;
@@ -478,7 +478,7 @@ export class WorkflowMapper {
     const jobToStepSpacing = 150; // Increased space between job and its first step for better edge visibility
 
     // Position job nodes horizontally with proper spacing first to calculate total width
-    jobNodes.forEach((node) => {
+    jobNodes.forEach(node => {
       node.position = {
         x: currentJobX,
         y: jobStartY,
@@ -510,10 +510,10 @@ export class WorkflowMapper {
     }
 
     // Position step nodes in waterfall under their parent jobs (center-aligned)
-    stepNodes.forEach((stepNode) => {
+    stepNodes.forEach(stepNode => {
       const jobId = stepNode.id.split("-step-")[0];
       const stepIndex = parseInt(stepNode.id.split("-step-")[1]);
-      const parentJob = jobNodes.find((job) => job.id === jobId);
+      const parentJob = jobNodes.find(job => job.id === jobId);
 
       if (parentJob) {
         // Calculate center alignment: job is 180px wide, step is 140px wide

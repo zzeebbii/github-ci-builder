@@ -16,33 +16,33 @@ function JobNode({ data, selected, id }: NodeProps & { data: JobNodeData }) {
   const hasErrors = data.errors && data.errors.length > 0;
   const isValid = data.isValid !== false;
   const toggleEdgeAnimation = useWorkflowStore(
-    (state) => state.toggleEdgeAnimation
+    state => state.toggleEdgeAnimation
   );
-  const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
-  const animatedEdges = useWorkflowStore((state) => state.animatedEdges);
-  const edges = useWorkflowStore((state) => state.edges);
-  const nodes = useWorkflowStore((state) => state.nodes);
+  const setSelectedNode = useWorkflowStore(state => state.setSelectedNode);
+  const animatedEdges = useWorkflowStore(state => state.animatedEdges);
+  const edges = useWorkflowStore(state => state.edges);
+  const nodes = useWorkflowStore(state => state.nodes);
 
   // Check if this node has any animated job-to-job edges (both incoming and outgoing)
-  const hasAnimatedEdges = Array.from(animatedEdges).some((edgeId) => {
-    const edge = edges.find((e) => e.id === edgeId);
-    if (!edge) return false;
+  const hasAnimatedEdges = Array.from(animatedEdges).some(edgeId => {
+    const edge = edges.find(e => e.id === edgeId);
+    if (!edge) {return false;}
 
     // Check if this edge connects to this node (either as source or target)
     const isConnectedToNode = edge.source === id || edge.target === id;
-    if (!isConnectedToNode) return false;
+    if (!isConnectedToNode) {return false;}
 
     // Check if both source and target are job nodes
-    const sourceNode = nodes.find((n) => n.id === edge.source);
-    const targetNode = nodes.find((n) => n.id === edge.target);
+    const sourceNode = nodes.find(n => n.id === edge.source);
+    const targetNode = nodes.find(n => n.id === edge.target);
     return sourceNode?.type === "job" && targetNode?.type === "job";
   });
 
   const getRunnerColor = () => {
-    if (!data.runsOn || typeof data.runsOn !== "string") return "text-gray-600";
-    if (data.runsOn.includes("ubuntu")) return "text-orange-600";
-    if (data.runsOn.includes("windows")) return "text-blue-600";
-    if (data.runsOn.includes("macos")) return "text-gray-600";
+    if (!data.runsOn || typeof data.runsOn !== "string") {return "text-gray-600";}
+    if (data.runsOn.includes("ubuntu")) {return "text-orange-600";}
+    if (data.runsOn.includes("windows")) {return "text-blue-600";}
+    if (data.runsOn.includes("macos")) {return "text-gray-600";}
     return "text-gray-600";
   };
 
@@ -51,7 +51,7 @@ function JobNode({ data, selected, id }: NodeProps & { data: JobNodeData }) {
     if (id) {
       // First set the selected node for properties panel
       setSelectedNode(id);
-      
+
       // Then toggle edge animation
       toggleEdgeAnimation(id);
     }
@@ -73,10 +73,10 @@ function JobNode({ data, selected, id }: NodeProps & { data: JobNodeData }) {
           hasErrors
             ? "border-red-400"
             : isValid
-            ? hasAnimatedEdges
-              ? "border-orange-400"
-              : "border-purple-400"
-            : "border-gray-300"
+              ? hasAnimatedEdges
+                ? "border-orange-400"
+                : "border-purple-400"
+              : "border-gray-300"
         }
       `}
     >

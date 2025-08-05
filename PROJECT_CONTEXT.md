@@ -30,6 +30,7 @@
 - **Lucide React** - Icon library
 
 ### Project Structure
+
 ```
 src/
 ├── components/
@@ -102,13 +103,11 @@ src/
 ### Recent Major Enhancements
 
 1. **Enhanced Workflow Layout** (Commit: 006ec0a)
-
    - Job ordering: Independent jobs render first (left), dependent jobs second (right)
    - Step node spacing: 120px vertical distance for optimal readability
    - Center-aligned step nodes under parent jobs
 
 2. **Fixed Edge Animation System**
-
    - Resolved selection bug where clicking job nodes didn't properly toggle animations
    - Exclusive selection: only one job can have animated edges at a time
    - Bidirectional animation for job-to-job connections with visual feedback
@@ -220,12 +219,10 @@ App
 ### Recently Fixed
 
 1. **Edge Animation Selection Bug** ✅
-
    - Issue: Clicking job nodes didn't properly toggle animations
    - Solution: Simplified toggleEdgeAnimation logic with explicit return statements
 
 2. **Step Node Action Names** ✅
-
    - Issue: Action names not displaying in nodes or properties panel
    - Solution: Enhanced step data mapping with proper actionName extraction
 
@@ -259,7 +256,7 @@ useHistoryStore.getState().addAction({
 export default memo(NodeComponent);
 
 // Zustand state selection
-const { nodes, edges, toggleEdgeAnimation } = useWorkflowStore((state) => ({
+const { nodes, edges, toggleEdgeAnimation } = useWorkflowStore(state => ({
   nodes: state.nodes,
   edges: state.edges,
   toggleEdgeAnimation: state.toggleEdgeAnimation,
@@ -338,6 +335,7 @@ const arrangedNodes = WorkflowMapper.applyWaterfallLayout(nodes);
 ## 🔄 Changelog
 
 ### v1.1.0 (Latest - Commit: ae5d59d)
+
 - ✅ Refactored default workflows to separate file for better maintainability
 - ✅ Added engaging icons to workflow, job, and step names for better UX
 - ✅ Simplified default workflow to clear 4-job dependency structure
@@ -345,6 +343,7 @@ const arrangedNodes = WorkflowMapper.applyWaterfallLayout(nodes);
 - ✅ Centralized workflow definitions in `src/data/default-workflows.ts`
 
 ### v1.0.0 (Commit: 006ec0a)
+
 - ✅ Enhanced workflow layout with dependency-aware job ordering
 - ✅ Fixed edge animation selection bug with exclusive selection
 - ✅ Improved step node spacing (120px vertical distance)

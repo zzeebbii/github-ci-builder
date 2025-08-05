@@ -115,13 +115,13 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   animatedEdges: new Set<string>(), // Initialize animated edges set
 
   // Actions
-  setWorkflow: (workflow) => {
+  setWorkflow: workflow => {
     set({ workflow });
     get().syncToVisual();
     get().validateWorkflow();
   },
 
-  updateWorkflow: (updates) => {
+  updateWorkflow: updates => {
     const currentWorkflow = get().workflow;
     const currentNodes = get().nodes;
     const currentEdges = get().edges;
@@ -137,7 +137,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       },
     });
 
-    set((state) => ({
+    set(state => ({
       workflow: { ...state.workflow, ...updates },
     }));
     // Don't call syncToVisual() for workflow property updates
@@ -145,7 +145,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     get().validateWorkflow();
   },
 
-  importFromYaml: (yamlContent) => {
+  importFromYaml: yamlContent => {
     try {
       // This would use a YAML parser like js-yaml
       // For now, we'll assume the workflow is provided as a JSON string
@@ -180,7 +180,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     set({ nodes: optimizedNodes, edges });
   },
 
-  addNode: (node) => {
+  addNode: node => {
     const currentWorkflow = get().workflow;
     const currentNodes = get().nodes;
     const currentEdges = get().edges;
@@ -196,7 +196,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       },
     });
 
-    set((state) => ({
+    set(state => ({
       nodes: [...state.nodes, node],
     }));
     get().syncFromVisual();
@@ -206,7 +206,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     const currentWorkflow = get().workflow;
     const currentNodes = get().nodes;
     const currentEdges = get().edges;
-    const nodeToUpdate = currentNodes.find((n) => n.id === id);
+    const nodeToUpdate = currentNodes.find(n => n.id === id);
 
     // Save current state to history
     useHistoryStore.getState().addAction({
@@ -221,8 +221,8 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       },
     });
 
-    set((state) => ({
-      nodes: state.nodes.map((node) =>
+    set(state => ({
+      nodes: state.nodes.map(node =>
         node.id === id ? { ...node, ...updates } : node
       ),
     }));
@@ -233,7 +233,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     const currentWorkflow = get().workflow;
     const currentNodes = get().nodes;
     const currentEdges = get().edges;
-    const nodeToUpdate = currentNodes.find((n) => n.id === id);
+    const nodeToUpdate = currentNodes.find(n => n.id === id);
 
     // Save current state to history
     useHistoryStore.getState().addAction({
@@ -248,22 +248,22 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       },
     });
 
-    set((state) => ({
-      nodes: state.nodes.map((node) =>
+    set(state => ({
+      nodes: state.nodes.map(node =>
         node.id === id ? { ...node, data: { ...node.data, ...data } } : node
       ),
     }));
     get().syncFromVisual();
   },
 
-  updateNodePositions: (nodes) => {
+  updateNodePositions: nodes => {
     set({ nodes });
     get().syncFromVisual();
   },
 
   autoArrangeNodes: () => {
     const { nodes } = get();
-    if (nodes.length === 0) return;
+    if (nodes.length === 0) {return;}
 
     // Apply the same waterfall layout as initial render
     const arrangedNodes = WorkflowMapper.optimizeNodeLayout(nodes);
@@ -272,11 +272,11 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     get().syncToVisual();
   },
 
-  removeNode: (id) => {
+  removeNode: id => {
     const currentWorkflow = get().workflow;
     const currentNodes = get().nodes;
     const currentEdges = get().edges;
-    const nodeToRemove = currentNodes.find((n) => n.id === id);
+    const nodeToRemove = currentNodes.find(n => n.id === id);
 
     // Save current state to history
     useHistoryStore.getState().addAction({
@@ -291,22 +291,22 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       },
     });
 
-    set((state) => ({
-      nodes: state.nodes.filter((node) => node.id !== id),
+    set(state => ({
+      nodes: state.nodes.filter(node => node.id !== id),
       edges: state.edges.filter(
-        (edge) => edge.source !== id && edge.target !== id
+        edge => edge.source !== id && edge.target !== id
       ),
       selectedNode: state.selectedNode === id ? null : state.selectedNode,
     }));
     get().syncFromVisual();
   },
 
-  addEdge: (edge) => {
+  addEdge: edge => {
     const currentWorkflow = get().workflow;
     const currentNodes = get().nodes;
     const currentEdges = get().edges;
-    const sourceNode = currentNodes.find((n) => n.id === edge.source);
-    const targetNode = currentNodes.find((n) => n.id === edge.target);
+    const sourceNode = currentNodes.find(n => n.id === edge.source);
+    const targetNode = currentNodes.find(n => n.id === edge.target);
 
     // Save current state to history
     useHistoryStore.getState().addAction({
@@ -321,21 +321,21 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       },
     });
 
-    set((state) => ({
+    set(state => ({
       edges: [...state.edges, edge],
     }));
     get().syncFromVisual();
   },
 
-  updateEdges: (edges) => {
+  updateEdges: edges => {
     set({ edges });
     get().syncFromVisual();
   },
 
   validateConnection: (sourceId, targetId) => {
     const { nodes } = get();
-    const sourceNode = nodes.find((n) => n.id === sourceId);
-    const targetNode = nodes.find((n) => n.id === targetId);
+    const sourceNode = nodes.find(n => n.id === sourceId);
+    const targetNode = nodes.find(n => n.id === targetId);
 
     if (!sourceNode || !targetNode) {
       return { isValid: false, error: "Source or target node not found" };
@@ -344,7 +344,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     // Check if connection already exists
     const { edges } = get();
     const existingConnection = edges.find(
-      (e) => e.source === sourceId && e.target === targetId
+      e => e.source === sourceId && e.target === targetId
     );
     if (existingConnection) {
       return { isValid: false, error: "Connection already exists" };
@@ -352,10 +352,10 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
     // Check for circular dependencies
     const wouldCreateCycle = (source: string, target: string): boolean => {
-      if (source === target) return true;
+      if (source === target) {return true;}
 
-      const targetEdges = edges.filter((e) => e.source === target);
-      return targetEdges.some((edge) => wouldCreateCycle(source, edge.target));
+      const targetEdges = edges.filter(e => e.source === target);
+      return targetEdges.some(edge => wouldCreateCycle(source, edge.target));
     };
 
     if (wouldCreateCycle(sourceId, targetId)) {
@@ -395,18 +395,18 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     }
   },
 
-  removeEdge: (id) => {
-    set((state) => ({
-      edges: state.edges.filter((edge) => edge.id !== id),
+  removeEdge: id => {
+    set(state => ({
+      edges: state.edges.filter(edge => edge.id !== id),
     }));
     get().syncFromVisual();
   },
 
-  setSelectedNode: (id) => {
+  setSelectedNode: id => {
     set({ selectedNode: id, showWorkflowProperties: false });
   },
 
-  setShowWorkflowProperties: (show) => {
+  setShowWorkflowProperties: show => {
     set({
       showWorkflowProperties: show,
       selectedNode: show ? null : get().selectedNode,
@@ -421,7 +421,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       validationResult,
       isValid: validationResult.isValid,
       errors: validationResult.errors.map(
-        (error) => `${error.path}: ${error.message}`
+        error => `${error.path}: ${error.message}`
       ),
     });
   },
@@ -456,18 +456,18 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       type,
       duration: 3000,
     };
-    set((state) => ({
+    set(state => ({
       toasts: [...state.toasts, toast],
     }));
   },
 
-  removeToast: (id) => {
-    set((state) => ({
-      toasts: state.toasts.filter((toast) => toast.id !== id),
+  removeToast: id => {
+    set(state => ({
+      toasts: state.toasts.filter(toast => toast.id !== id),
     }));
   },
 
-  restoreState: (state) => {
+  restoreState: state => {
     set({
       workflow: state.workflow,
       nodes: state.nodes,
@@ -481,22 +481,22 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     const { edges, nodes } = get();
 
     // Find all edges that connect this job node to other job nodes (both incoming and outgoing)
-    const jobToJobEdges = edges.filter((edge) => {
+    const jobToJobEdges = edges.filter(edge => {
       // Check if this edge connects to the clicked node (either as source or target)
       const isConnectedToNode =
         edge.source === nodeId || edge.target === nodeId;
-      if (!isConnectedToNode) return false;
+      if (!isConnectedToNode) {return false;}
 
       // Check if both source and target are job nodes
-      const sourceNode = nodes.find((n) => n.id === edge.source);
-      const targetNode = nodes.find((n) => n.id === edge.target);
+      const sourceNode = nodes.find(n => n.id === edge.source);
+      const targetNode = nodes.find(n => n.id === edge.target);
 
       return sourceNode?.type === "job" && targetNode?.type === "job";
     });
 
-    set((state) => {
+    set(state => {
       // Check if any job-to-job edge connected to this node is currently animated
-      const hasAnimatedEdge = jobToJobEdges.some((edge) =>
+      const hasAnimatedEdge = jobToJobEdges.some(edge =>
         state.animatedEdges.has(edge.id)
       );
 
@@ -506,7 +506,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       } else {
         // Clear all previous animations and add only this node's job-to-job edges
         const newAnimatedEdges = new Set<string>();
-        jobToJobEdges.forEach((edge) => {
+        jobToJobEdges.forEach(edge => {
           newAnimatedEdges.add(edge.id);
         });
 
@@ -517,7 +517,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   clearEdgeAnimations: () => {
     const { edges } = get();
-    const updatedEdges = edges.map((edge) => ({
+    const updatedEdges = edges.map(edge => ({
       ...edge,
       animated: false,
     }));

@@ -86,7 +86,7 @@ export default function PropertiesPanel({ onClose }: PropertiesPanelProps) {
                     Triggers
                   </label>
                   <div className="space-y-2">
-                    {Object.keys(workflow.on || {}).map((trigger) => (
+                    {Object.keys(workflow.on || {}).map(trigger => (
                       <div
                         key={trigger}
                         className="flex items-center justify-between p-2 bg-gray-50 rounded-md"

@@ -27,7 +27,7 @@ export default function PropertiesPanel({
   const [isOpen, setIsOpen] = useState(false);
 
   const selectedNodeData = selectedNode
-    ? nodes.find((node) => node.id === selectedNode)
+    ? nodes.find(node => node.id === selectedNode)
     : null;
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export default function PropertiesPanel({
       );
     }
 
-    if (!selectedNodeData) return null;
+    if (!selectedNodeData) {return null;}
 
     // Use the node ID as key to force re-render when switching nodes
     const nodeKey = `${selectedNodeData.type}-${selectedNodeData.id}`;

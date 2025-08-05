@@ -28,15 +28,15 @@ export default function WorkflowProperties({
 
   const addEnvVariable = () => {
     const key = prompt("Enter environment variable name:");
-    if (!key || key.trim() === "") return;
-    
+    if (!key || key.trim() === "") {return;}
+
     const value = prompt("Enter environment variable value:");
-    if (value === null) return; // User cancelled
-    
+    if (value === null) {return;} // User cancelled
+
     const trimmedKey = key.trim();
     const currentEnv = workflow.env || {};
     const newEnv = { ...currentEnv, [trimmedKey]: value };
-    
+
     // Update workflow directly - the UI will re-render from workflow state
     onUpdate({ env: newEnv });
   };
@@ -45,7 +45,7 @@ export default function WorkflowProperties({
     const currentEnv = workflow.env || {};
     const newEnv = { ...currentEnv };
     delete newEnv[key];
-    
+
     // Update workflow directly - the UI will re-render from workflow state
     onUpdate({ env: Object.keys(newEnv).length > 0 ? newEnv : undefined });
   };
@@ -93,7 +93,7 @@ export default function WorkflowProperties({
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="CI"
             value={workflow.name || ""}
-            onChange={(e) => onUpdate({ name: e.target.value || undefined })}
+            onChange={e => onUpdate({ name: e.target.value || undefined })}
           />
         </div>
 
@@ -106,7 +106,9 @@ export default function WorkflowProperties({
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Deploy by @${{ github.actor }}"
             value={workflow["run-name"] || ""}
-            onChange={(e) => onUpdate({ "run-name": e.target.value || undefined })}
+            onChange={e =>
+              onUpdate({ "run-name": e.target.value || undefined })
+            }
           />
         </div>
       </div>
@@ -123,7 +125,7 @@ export default function WorkflowProperties({
             { key: "pull_request", label: "Pull request" },
             { key: "workflow_dispatch", label: "Manual trigger" },
             { key: "schedule", label: "Scheduled" },
-          ].map((trigger) => (
+          ].map(trigger => (
             <label key={trigger.key} className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -190,10 +192,7 @@ export default function WorkflowProperties({
         ) : (
           <div className="space-y-2">
             {Object.entries(workflow.env || {}).map(([key, value]) => (
-              <div 
-                key={key} 
-                className="flex items-center gap-2 text-xs"
-              >
+              <div key={key} className="flex items-center gap-2 text-xs">
                 <code className="bg-gray-100 px-2 py-1 rounded font-mono text-gray-800 flex-1">
                   {key}={String(value)}
                 </code>
@@ -226,16 +225,16 @@ export default function WorkflowProperties({
             "packages",
             "pull-requests",
             "security-events",
-          ].map((permission) => (
+          ].map(permission => (
             <label key={permission} className="flex items-center space-x-1">
               <input
                 type="checkbox"
                 checked={
-                  !!(workflow.permissions as Record<string, unknown> || {})[
+                  !!((workflow.permissions as Record<string, unknown>) || {})[
                     permission
                   ]
                 }
-                onChange={(e) => {
+                onChange={e => {
                   const newPermissions = { ...(workflow.permissions || {}) };
                   if (e.target.checked) {
                     (newPermissions as Record<string, string>)[permission] =
@@ -245,10 +244,11 @@ export default function WorkflowProperties({
                       permission
                     ];
                   }
-                  onUpdate({ 
-                    permissions: Object.keys(newPermissions).length > 0 
-                      ? newPermissions 
-                      : undefined 
+                  onUpdate({
+                    permissions:
+                      Object.keys(newPermissions).length > 0
+                        ? newPermissions
+                        : undefined,
                   });
                 }}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"

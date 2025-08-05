@@ -49,15 +49,15 @@ export default function StepProperties({
   );
 
   const validateStep = useCallback(() => {
-    if (!label.trim()) return false;
-    if (stepType === "action" && !actionName.trim()) return false;
-    if (stepType === "run" && !runCommand.trim()) return false;
+    if (!label.trim()) {return false;}
+    if (stepType === "action" && !actionName.trim()) {return false;}
+    if (stepType === "run" && !runCommand.trim()) {return false;}
     return true;
   }, [label, stepType, actionName, runCommand]);
 
   const getValidationErrors = useCallback(() => {
     const errors = [];
-    if (!label.trim()) errors.push("Step name is required");
+    if (!label.trim()) {errors.push("Step name is required");}
     if (stepType === "action" && !actionName.trim()) {
       errors.push("Action name is required");
     }
@@ -161,7 +161,7 @@ export default function StepProperties({
         <input
           type="text"
           value={label}
-          onChange={(e) => setLabel(e.target.value)}
+          onChange={e => setLabel(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
           placeholder="Enter step name"
         />
@@ -177,7 +177,7 @@ export default function StepProperties({
         </label>
         <select
           value={stepType}
-          onChange={(e) => setStepType(e.target.value)}
+          onChange={e => setStepType(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
         >
           <option value="action">Use Action</option>
@@ -196,12 +196,12 @@ export default function StepProperties({
               <input
                 type="text"
                 value={actionName}
-                onChange={(e) => setActionName(e.target.value)}
+                onChange={e => setActionName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 placeholder="owner/action-name"
               />
               <div className="grid grid-cols-1 gap-1 max-h-32 overflow-y-auto">
-                {getPopularActions().map((action) => (
+                {getPopularActions().map(action => (
                   <button
                     key={action.name}
                     onClick={() => {
@@ -227,7 +227,7 @@ export default function StepProperties({
             <input
               type="text"
               value={actionVersion}
-              onChange={(e) => setActionVersion(e.target.value)}
+              onChange={e => setActionVersion(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
               placeholder="v4, main, or commit SHA"
             />
@@ -247,7 +247,7 @@ export default function StepProperties({
             </label>
             <textarea
               value={runCommand}
-              onChange={(e) => setRunCommand(e.target.value)}
+              onChange={e => setRunCommand(e.target.value)}
               rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-sm"
               placeholder="echo 'Hello World'"
@@ -260,7 +260,7 @@ export default function StepProperties({
             </label>
             <select
               value={shell}
-              onChange={(e) => setShell(e.target.value)}
+              onChange={e => setShell(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
             >
               <option value="bash">bash</option>
@@ -281,7 +281,7 @@ export default function StepProperties({
         <input
           type="text"
           value={workingDirectory}
-          onChange={(e) => setWorkingDirectory(e.target.value)}
+          onChange={e => setWorkingDirectory(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
           placeholder="./subdirectory"
         />
@@ -296,7 +296,7 @@ export default function StepProperties({
             type="checkbox"
             id="continueOnError"
             checked={continueOnError}
-            onChange={(e) => setContinueOnError(e.target.checked)}
+            onChange={e => setContinueOnError(e.target.checked)}
             className="rounded border-gray-300 text-green-600 focus:ring-green-500"
           />
           <label htmlFor="continueOnError" className="text-sm text-gray-700">
@@ -311,7 +311,7 @@ export default function StepProperties({
           <input
             type="text"
             value={condition}
-            onChange={(e) => setCondition(e.target.value)}
+            onChange={e => setCondition(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-sm"
             placeholder="success() || failure()"
           />

@@ -36,6 +36,7 @@ npm run build
 ## 🎯 Common Development Tasks
 
 ### Adding New Workflow Templates
+
 1. Add new template to `src/data/default-workflows.ts`
 2. Export it in `WORKFLOW_TEMPLATES` object
 3. Update `WorkflowTemplateKey` type
@@ -69,7 +70,7 @@ npm run build
 
 ```typescript
 // Get state
-const nodes = useWorkflowStore((state) => state.nodes);
+const nodes = useWorkflowStore(state => state.nodes);
 
 // Update with history
 useHistoryStore.getState().addAction({
