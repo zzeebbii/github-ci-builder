@@ -30,7 +30,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
       if (!isOpen) {
         return;
       }
-      
+
       if (event.key === "Escape") {
         onClose();
       } else if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
@@ -51,9 +51,9 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
     const jobCount = Object.keys(template.workflow.jobs).length;
     const stepCount = Object.values(template.workflow.jobs).reduce(
       (total, job) => total + (job.steps?.length || 0),
-      0,
+      0
     );
-    
+
     // Basic estimation: 1 min per job + 0.5 min per step
     return Math.max(2, Math.round(jobCount + stepCount * 0.5));
   };
@@ -100,18 +100,20 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center gap-4">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">{template.name}</h2>
+              <h2 className="text-xl font-semibold text-gray-900">
+                {template.name}
+              </h2>
               <div className="flex items-center gap-2 mt-1">
                 <span
                   className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(
-                    template.difficulty,
+                    template.difficulty
                   )}`}
                 >
                   {template.difficulty}
                 </span>
                 <span
                   className={`px-2 py-1 rounded text-xs font-medium ${getCategoryColor(
-                    template.category,
+                    template.category
                   )}`}
                 >
                   {template.category}
@@ -133,7 +135,9 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
           <div className="lg:w-1/2 p-6 border-r border-gray-200 overflow-y-auto">
             <div className="space-y-6">
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Description
+                </h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   {template.description}
                 </p>
@@ -142,7 +146,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Tags</h3>
                 <div className="flex flex-wrap gap-2">
-                  {template.tags.map((tag) => (
+                  {template.tags.map(tag => (
                     <span
                       key={tag}
                       className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs flex items-center gap-1"
@@ -155,13 +159,17 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
               </div>
 
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Workflow Details</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Workflow Details
+                </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2 text-gray-600">
                     <GitBranch className="w-4 h-4" />
                     <span>
                       {Object.keys(template.workflow.jobs).length} job
-                      {Object.keys(template.workflow.jobs).length !== 1 ? "s" : ""}
+                      {Object.keys(template.workflow.jobs).length !== 1
+                        ? "s"
+                        : ""}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
@@ -169,49 +177,57 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
                     <span>
                       {Object.values(template.workflow.jobs).reduce(
                         (total, job) => total + (job.steps?.length || 0),
-                        0,
+                        0
                       )}{" "}
                       total steps
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <Eye className="w-4 h-4" />
-                    <span>Est. runtime: {getEstimatedRuntime(template)} min</span>
+                    <span>
+                      Est. runtime: {getEstimatedRuntime(template)} min
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {template.requiredSecrets && template.requiredSecrets.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Required Secrets</h3>
-                  <div className="space-y-1">
-                    {template.requiredSecrets.map((secret) => (
-                      <div
-                        key={secret}
-                        className="text-sm text-red-600 bg-red-50 px-2 py-1 rounded"
-                      >
-                        {secret}
-                      </div>
-                    ))}
+              {template.requiredSecrets &&
+                template.requiredSecrets.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      Required Secrets
+                    </h3>
+                    <div className="space-y-1">
+                      {template.requiredSecrets.map(secret => (
+                        <div
+                          key={secret}
+                          className="text-sm text-red-600 bg-red-50 px-2 py-1 rounded"
+                        >
+                          {secret}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {template.requiredVariables && template.requiredVariables.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Required Variables</h3>
-                  <div className="space-y-1">
-                    {template.requiredVariables.map((variable) => (
-                      <div
-                        key={variable}
-                        className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded"
-                      >
-                        {variable}
-                      </div>
-                    ))}
+              {template.requiredVariables &&
+                template.requiredVariables.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      Required Variables
+                    </h3>
+                    <div className="space-y-1">
+                      {template.requiredVariables.map(variable => (
+                        <div
+                          key={variable}
+                          className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded"
+                        >
+                          {variable}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
 
@@ -236,14 +252,24 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
           <div className="text-sm text-gray-500">
             <div>Ready to use this template in your workflow?</div>
             <div className="text-xs mt-1 opacity-75">
-              Press <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Esc</kbd> to close, <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Cmd+Enter</kbd> to use template
+              Press{" "}
+              <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Esc</kbd>{" "}
+              to close,{" "}
+              <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">
+                Cmd+Enter
+              </kbd>{" "}
+              to use template
             </div>
           </div>
           <div className="flex gap-3">
             <Button variant="secondary" onClick={onClose}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleUseTemplate} className="flex items-center gap-2">
+            <Button
+              variant="primary"
+              onClick={handleUseTemplate}
+              className="flex items-center gap-2"
+            >
               <Download className="w-4 h-4" />
               Use Template
             </Button>

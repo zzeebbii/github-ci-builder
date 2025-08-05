@@ -42,7 +42,7 @@ export const TemplateFilters: React.FC<TemplateFiltersProps> = ({
           type="text"
           placeholder="Search templates..."
           value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={e => onSearchChange(e.target.value)}
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
         />
       </div>
@@ -58,10 +58,10 @@ export const TemplateFilters: React.FC<TemplateFiltersProps> = ({
           {/* Category Filter */}
           <select
             value={selectedCategory}
-            onChange={(e) => onCategoryChange(e.target.value)}
+            onChange={e => onCategoryChange(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
           >
-            {CATEGORIES.map((category) => (
+            {CATEGORIES.map(category => (
               <option key={category.value} value={category.value}>
                 {category.label}
               </option>
@@ -71,10 +71,10 @@ export const TemplateFilters: React.FC<TemplateFiltersProps> = ({
           {/* Difficulty Filter */}
           <select
             value={selectedDifficulty}
-            onChange={(e) => onDifficultyChange(e.target.value)}
+            onChange={e => onDifficultyChange(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
           >
-            {DIFFICULTIES.map((difficulty) => (
+            {DIFFICULTIES.map(difficulty => (
               <option key={difficulty.value} value={difficulty.value}>
                 {difficulty.label}
               </option>

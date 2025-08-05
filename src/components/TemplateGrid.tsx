@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
 import { useWorkflowStore } from "../store/workflow";
-import { WORKFLOW_TEMPLATES, type WorkflowTemplate } from "../data/default-workflows";
+import {
+  WORKFLOW_TEMPLATES,
+  type WorkflowTemplate,
+} from "../data/default-workflows";
 import Button from "./ui/Button";
 import { TemplatePreviewModal } from "./TemplatePreviewModal";
 
@@ -18,11 +21,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onPreview }) => {
 
   const handleUseTemplate = async () => {
     setIsLoading(true);
-    
+
     try {
       setWorkflow(template.workflow);
       addToast(`Template "${template.name}" loaded successfully!`, "success");
-      
+
       // Navigate to builder page after a short delay to show the toast
       setTimeout(() => {
         navigate("/");
@@ -71,24 +74,26 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onPreview }) => {
         <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
         <span
           className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(
-            template.difficulty,
+            template.difficulty
           )}`}
         >
           {template.difficulty}
         </span>
       </div>
 
-      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{template.description}</p>
+      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+        {template.description}
+      </p>
 
       <div className="flex items-center gap-2 mb-4">
         <span
           className={`px-2 py-1 rounded text-xs font-medium ${getCategoryColor(
-            template.category,
+            template.category
           )}`}
         >
           {template.category}
         </span>
-        {template.tags.slice(0, 2).map((tag) => (
+        {template.tags.slice(0, 2).map(tag => (
           <span
             key={tag}
             className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
@@ -97,7 +102,9 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onPreview }) => {
           </span>
         ))}
         {template.tags.length > 2 && (
-          <span className="text-xs text-gray-500">+{template.tags.length - 2} more</span>
+          <span className="text-xs text-gray-500">
+            +{template.tags.length - 2} more
+          </span>
         )}
       </div>
 
@@ -107,7 +114,12 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onPreview }) => {
           {Object.keys(template.workflow.jobs).length !== 1 ? "s" : ""}
         </div>
         <div className="flex gap-2">
-          <Button onClick={handlePreview} size="sm" variant="ghost" disabled={isLoading}>
+          <Button
+            onClick={handlePreview}
+            size="sm"
+            variant="ghost"
+            disabled={isLoading}
+          >
             <Eye className="w-4 h-4" />
           </Button>
           <Button onClick={handleUseTemplate} size="sm" disabled={isLoading}>
@@ -130,18 +142,21 @@ export const TemplateGrid: React.FC<TemplateGridProps> = ({
   selectedCategory = "",
   selectedDifficulty = "",
 }) => {
-  const [previewTemplate, setPreviewTemplate] = useState<WorkflowTemplate | null>(null);
+  const [previewTemplate, setPreviewTemplate] =
+    useState<WorkflowTemplate | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { setWorkflow, addToast } = useWorkflowStore();
   const navigate = useNavigate();
   const templates = Object.values(WORKFLOW_TEMPLATES);
 
-  const filteredTemplates = templates.filter((template) => {
+  const filteredTemplates = templates.filter(template => {
     const matchesSearch =
       searchQuery === "" ||
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      template.tags.some(tag =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
     const matchesCategory =
       selectedCategory === "" || template.category === selectedCategory;
@@ -165,7 +180,7 @@ export const TemplateGrid: React.FC<TemplateGridProps> = ({
   const handleUseTemplate = (template: WorkflowTemplate) => {
     setWorkflow(template.workflow);
     addToast(`Template "${template.name}" loaded successfully!`, "success");
-    
+
     // Navigate to builder page after a short delay to show the toast
     setTimeout(() => {
       navigate("/");
@@ -175,8 +190,12 @@ export const TemplateGrid: React.FC<TemplateGridProps> = ({
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTemplates.map((template) => (
-          <TemplateCard key={template.id} template={template} onPreview={handlePreview} />
+        {filteredTemplates.map(template => (
+          <TemplateCard
+            key={template.id}
+            template={template}
+            onPreview={handlePreview}
+          />
         ))}
         {filteredTemplates.length === 0 && (
           <div className="col-span-full text-center py-12">

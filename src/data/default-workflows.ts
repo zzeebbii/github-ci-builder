@@ -793,9 +793,9 @@ export const MONOREPO_CI_WORKFLOW: GitHubWorkflow = {
       name: "🔍 Detect Changes",
       "runs-on": "ubuntu-latest",
       outputs: {
-        "frontend": "${{ steps.changes.outputs.frontend }}",
-        "backend": "${{ steps.changes.outputs.backend }}",
-        "shared": "${{ steps.changes.outputs.shared }}",
+        frontend: "${{ steps.changes.outputs.frontend }}",
+        backend: "${{ steps.changes.outputs.backend }}",
+        shared: "${{ steps.changes.outputs.shared }}",
       },
       steps: [
         {
@@ -942,7 +942,8 @@ export const WORKFLOW_TEMPLATES: Record<string, WorkflowTemplate> = {
   default: {
     id: "default",
     name: "🚀 Full CI/CD Pipeline",
-    description: "Complete pipeline with testing, linting, building, and deployment",
+    description:
+      "Complete pipeline with testing, linting, building, and deployment",
     category: "Full Stack",
     tags: ["ci/cd", "testing", "deployment", "nodejs"],
     difficulty: "advanced",
@@ -1019,7 +1020,8 @@ export const WORKFLOW_TEMPLATES: Record<string, WorkflowTemplate> = {
   security: {
     id: "security",
     name: "🔒 Security Scanner",
-    description: "Comprehensive security scanning with CodeQL, Snyk, and dependency auditing",
+    description:
+      "Comprehensive security scanning with CodeQL, Snyk, and dependency auditing",
     category: "DevOps",
     tags: ["security", "codeql", "snyk", "audit", "sast"],
     difficulty: "advanced",
@@ -1030,18 +1032,24 @@ export const WORKFLOW_TEMPLATES: Record<string, WorkflowTemplate> = {
   "multi-env": {
     id: "multi-env",
     name: "🚀 Multi-Environment Deploy",
-    description: "Deploy to dev/staging/prod environments with approval gates and E2E testing",
+    description:
+      "Deploy to dev/staging/prod environments with approval gates and E2E testing",
     category: "DevOps",
     tags: ["deployment", "environments", "approval", "e2e", "staging"],
     difficulty: "advanced",
     requiredSecrets: ["DEV_API_KEY", "STAGING_API_KEY", "PROD_API_KEY"],
-    requiredVariables: ["DEV_DEPLOY_URL", "STAGING_DEPLOY_URL", "PROD_DEPLOY_URL"],
+    requiredVariables: [
+      "DEV_DEPLOY_URL",
+      "STAGING_DEPLOY_URL",
+      "PROD_DEPLOY_URL",
+    ],
     workflow: MULTI_ENV_DEPLOY_WORKFLOW,
   },
   monorepo: {
     id: "monorepo",
     name: "📦 Monorepo CI",
-    description: "Optimized CI for monorepos with selective testing and building based on changes",
+    description:
+      "Optimized CI for monorepos with selective testing and building based on changes",
     category: "Full Stack",
     tags: ["monorepo", "selective", "workspaces", "optimization", "changes"],
     difficulty: "intermediate",
