@@ -3,6 +3,8 @@ import Header from "./components/layout/Header";
 import BuilderView from "./components/views/BuilderView";
 import ImportView from "./components/views/ImportView";
 import { TemplateBrowserView } from "./components/views/TemplateBrowserView";
+import { GitHubIntegrationView } from "./components/views/GitHubIntegrationView";
+import { GitHubCallback } from "./components/auth/GitHubCallback";
 import { ToastManager } from "./components/ui/Toast";
 import { useWorkflowStore } from "./store/workflow";
 
@@ -19,8 +21,11 @@ function App() {
 
         <Routes>
           <Route path="/" element={<BuilderView />} />
+          <Route path="/builder" element={<BuilderView />} />
           <Route path="/templates" element={<TemplateBrowserView />} />
           <Route path="/import" element={<ImportView />} />
+          <Route path="/github" element={<GitHubIntegrationView />} />
+          <Route path="/auth/callback" element={<GitHubCallback />} />
         </Routes>
 
         <ToastManager toasts={toasts} onClose={removeToast} />

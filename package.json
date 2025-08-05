@@ -16,6 +16,8 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
     "@monaco-editor/react": "^4.7.0",
+    "@octokit/auth-oauth-app": "^9.0.1",
+    "@octokit/rest": "^22.0.0",
     "@tailwindcss/vite": "^4.1.11",
     "@xyflow/react": "^12.8.2",
     "js-yaml": "^4.1.0",

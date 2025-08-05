@@ -1,5 +1,6 @@
 import { GitBranch, HelpCircle, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { GitHubAuth } from "../auth/GitHubAuth";
 
 const navigation = [
   { name: "Builder", href: "/", description: "Visual workflow builder" },
@@ -9,7 +10,11 @@ const navigation = [
     description: "Browse workflow templates",
   },
   { name: "Import", href: "/import", description: "Import YAML workflows" },
-  { name: "Export", href: "/export", description: "Export to YAML" },
+  {
+    name: "GitHub",
+    href: "/github",
+    description: "GitHub integration & repositories",
+  },
 ];
 
 export default function Header() {
@@ -50,20 +55,24 @@ export default function Header() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              className="p-2 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100"
-              title="Help"
-            >
-              <HelpCircle className="w-5 h-5" />
-            </button>
+          <div className="flex items-center gap-4">
+            <GitHubAuth />
 
-            <button
-              className="p-2 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100"
-              title="Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                className="p-2 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100"
+                title="Help"
+              >
+                <HelpCircle className="w-5 h-5" />
+              </button>
+
+              <button
+                className="p-2 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100"
+                title="Settings"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
