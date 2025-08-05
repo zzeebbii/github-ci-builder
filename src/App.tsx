@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/layout/Header";
 import BuilderView from "./components/views/BuilderView";
 import ImportView from "./components/views/ImportView";
+import { TemplateBrowserView } from "./components/views/TemplateBrowserView";
 import { ToastManager } from "./components/ui/Toast";
 import { useWorkflowStore } from "./store/workflow";
 
@@ -18,6 +19,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={<BuilderView />} />
+          <Route path="/templates" element={<TemplateBrowserView />} />
           <Route path="/import" element={<ImportView />} />
         </Routes>
 

@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const navigation = [
   { name: "Builder", href: "/", description: "Visual workflow builder" },
+  { name: "Templates", href: "/templates", description: "Browse workflow templates" },
   { name: "Import", href: "/import", description: "Import YAML workflows" },
   { name: "Export", href: "/export", description: "Export to YAML" },
 ];
