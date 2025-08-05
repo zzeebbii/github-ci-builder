@@ -394,6 +394,10 @@ export interface VisualEdge {
   targetHandle?: string;
   type?: "default" | "straight" | "step" | "smoothstep" | "dependency" | "flow";
   animated?: boolean;
+  style?: React.CSSProperties;
+  label?: string;
+  labelStyle?: React.CSSProperties;
+  labelBgStyle?: React.CSSProperties;
 }
 
 export interface WorkflowStore {
