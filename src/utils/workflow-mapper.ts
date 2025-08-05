@@ -34,10 +34,13 @@ export class WorkflowMapper {
       return pos;
     };
 
-    const getStepPosition = (jobPos: { x: number; y: number }, stepIndex: number) => {
+    const getStepPosition = (
+      jobPos: { x: number; y: number },
+      stepIndex: number
+    ) => {
       return {
         x: jobPos.x, // Align steps directly under the job
-        y: jobPos.y + jobToStepSpacing + (stepIndex * stepHeight), // Waterfall below job
+        y: jobPos.y + jobToStepSpacing + stepIndex * stepHeight, // Waterfall below job
       };
     };
 
@@ -154,7 +157,12 @@ export class WorkflowMapper {
               },
               label: "depends on",
               labelStyle: { fontSize: 10, fontWeight: 600, fill: "#8b5cf6" },
-              labelBgStyle: { fill: "#ffffff", fillOpacity: 0.9, stroke: "#8b5cf6", strokeWidth: 1 },
+              labelBgStyle: {
+                fill: "#ffffff",
+                fillOpacity: 0.9,
+                stroke: "#8b5cf6",
+                strokeWidth: 1,
+              },
             });
           }
         });
@@ -175,7 +183,12 @@ export class WorkflowMapper {
           },
           label: "triggers",
           labelStyle: { fontSize: 10, fontWeight: 600, fill: "#3b82f6" },
-          labelBgStyle: { fill: "#ffffff", fillOpacity: 0.9, stroke: "#3b82f6", strokeWidth: 1 },
+          labelBgStyle: {
+            fill: "#ffffff",
+            fillOpacity: 0.9,
+            stroke: "#3b82f6",
+            strokeWidth: 1,
+          },
         });
       }
     });
@@ -429,21 +442,21 @@ export class WorkflowMapper {
   }
 
   /**
-   * Validate and update node positions using waterfall layout
+   * Apply waterfall layout to nodes - reusable function for consistent positioning
    */
-  static optimizeNodeLayout(nodes: VisualNode[]): VisualNode[] {
-    const optimizedNodes = [...nodes];
-    const jobNodes = optimizedNodes.filter((n) => n.type === "job");
-    const stepNodes = optimizedNodes.filter((n) => n.type === "step");
-    const triggerNodes = optimizedNodes.filter((n) => n.type === "trigger");
+  static applyWaterfallLayout(nodes: VisualNode[]): VisualNode[] {
+    const layoutNodes = [...nodes];
+    const jobNodes = layoutNodes.filter((n) => n.type === "job");
+    const stepNodes = layoutNodes.filter((n) => n.type === "step");
+    const triggerNodes = layoutNodes.filter((n) => n.type === "trigger");
 
-    // Layout constants - same as yamlToVisual
+    // Layout constants - consistent with yamlToVisual
     let currentJobX = 150;
     const triggerY = 50;
     const jobStartY = 200;
-    const jobSpacing = 400;
-    const stepHeight = 80;
-    const jobToStepSpacing = 100;
+    const jobSpacing = 400; // Horizontal space between job columns
+    const stepHeight = 80; // Vertical space for each step
+    const jobToStepSpacing = 100; // Space between job and its first step
 
     // Position trigger nodes at the top center
     triggerNodes.forEach((node, index) => {
@@ -471,12 +484,19 @@ export class WorkflowMapper {
       if (parentJob) {
         stepNode.position = {
           x: parentJob.position.x, // Align directly under job
-          y: parentJob.position.y + jobToStepSpacing + (stepIndex * stepHeight), // Waterfall layout
+          y: parentJob.position.y + jobToStepSpacing + stepIndex * stepHeight, // Waterfall layout
         };
       }
     });
 
-    return optimizedNodes;
+    return layoutNodes;
+  }
+
+  /**
+   * Validate and update node positions using waterfall layout
+   */
+  static optimizeNodeLayout(nodes: VisualNode[]): VisualNode[] {
+    return this.applyWaterfallLayout(nodes);
   }
 }
 
