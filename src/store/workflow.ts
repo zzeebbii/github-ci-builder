@@ -7,6 +7,7 @@ import type {
 } from "../types/github-actions";
 import { WorkflowMapper } from "../utils/workflow-mapper";
 import { useHistoryStore } from "./history";
+import { DEFAULT_WORKFLOW } from "../data/default-workflows";
 
 // Simple validation function
 const validateGitHubWorkflow = (workflow: GitHubWorkflow): ValidationResult => {
@@ -100,225 +101,9 @@ interface WorkflowState {
   clearEdgeAnimations: () => void; // New method to clear all animations
 }
 
-// Default workflow structure - Comprehensive CI/CD Pipeline
-const defaultWorkflow: GitHubWorkflow = {
-  name: "CI/CD Pipeline",
-  on: {
-    push: {
-      branches: ["main", "develop"],
-    },
-    pull_request: {
-      branches: ["main", "develop"],
-    },
-    release: {
-      types: ["published"],
-    },
-    workflow_dispatch: {
-      inputs: {
-        environment: {
-          description: "Environment to deploy to",
-          required: true,
-          default: "staging",
-          type: "choice",
-          options: ["staging", "production"],
-        },
-      },
-    },
-  },
-  env: {
-    NODE_VERSION: "18",
-    REGISTRY: "ghcr.io",
-  },
-  jobs: {
-    test: {
-      "runs-on": "ubuntu-latest",
-      strategy: {
-        matrix: {
-          "node-version": ["16", "18", "20"],
-        },
-      },
-      steps: [
-        {
-          name: "Checkout code",
-          uses: "actions/checkout@v4",
-        },
-        {
-          name: "Setup Node.js ${{ matrix.node-version }}",
-          uses: "actions/setup-node@v4",
-          with: {
-            "node-version": "${{ matrix.node-version }}",
-            cache: "npm",
-          },
-        },
-        {
-          name: "Install dependencies",
-          run: "npm ci",
-        },
-        {
-          name: "Run tests",
-          run: "npm test -- --coverage",
-        },
-        {
-          name: "Upload coverage reports",
-          uses: "codecov/codecov-action@v3",
-          if: "matrix.node-version == '18'",
-        },
-      ],
-    },
-    lint: {
-      "runs-on": "ubuntu-latest",
-      steps: [
-        {
-          name: "Checkout code",
-          uses: "actions/checkout@v4",
-        },
-        {
-          name: "Setup Node.js",
-          uses: "actions/setup-node@v4",
-          with: {
-            "node-version": "18",
-            cache: "npm",
-          },
-        },
-        {
-          name: "Install dependencies",
-          run: "npm ci",
-        },
-        {
-          name: "Run ESLint",
-          run: "npm run lint",
-        },
-        {
-          name: "Run Prettier",
-          run: "npm run format:check",
-        },
-        {
-          name: "Type check",
-          run: "npm run type-check",
-        },
-      ],
-    },
-    "security-scan": {
-      "runs-on": "ubuntu-latest",
-      steps: [
-        {
-          name: "Checkout code",
-          uses: "actions/checkout@v4",
-        },
-        {
-          name: "Run security audit",
-          run: "npm audit --audit-level high",
-        },
-        {
-          name: "Run CodeQL Analysis",
-          uses: "github/codeql-action/analyze@v2",
-          with: {
-            languages: "javascript",
-          },
-        },
-      ],
-    },
-    build: {
-      "runs-on": "ubuntu-latest",
-      needs: ["test", "lint"],
-      steps: [
-        {
-          name: "Checkout code",
-          uses: "actions/checkout@v4",
-        },
-        {
-          name: "Setup Node.js",
-          uses: "actions/setup-node@v4",
-          with: {
-            "node-version": "18",
-            cache: "npm",
-          },
-        },
-        {
-          name: "Install dependencies",
-          run: "npm ci",
-        },
-        {
-          name: "Build application",
-          run: "npm run build",
-        },
-        {
-          name: "Upload build artifacts",
-          uses: "actions/upload-artifact@v3",
-          with: {
-            name: "build-files",
-            path: "dist/",
-            "retention-days": 7,
-          },
-        },
-      ],
-    },
-    "cross-platform-test": {
-      strategy: {
-        matrix: {
-          os: ["ubuntu-latest", "windows-latest", "macos-latest"],
-        },
-      },
-      "runs-on": "${{ matrix.os }}",
-      steps: [
-        {
-          name: "Checkout code",
-          uses: "actions/checkout@v4",
-        },
-        {
-          name: "Setup Node.js",
-          uses: "actions/setup-node@v4",
-          with: {
-            "node-version": "18",
-          },
-        },
-        {
-          name: "Install dependencies",
-          run: "npm ci",
-        },
-        {
-          name: "Run platform-specific tests",
-          run: "npm run test:platform",
-        },
-      ],
-    },
-    deploy: {
-      "runs-on": "ubuntu-latest",
-      needs: ["build", "security-scan"],
-      if: "github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'",
-      environment: {
-        name: "${{ github.event.inputs.environment || 'staging' }}",
-        url: "https://${{ github.event.inputs.environment || 'staging' }}.example.com",
-      },
-      steps: [
-        {
-          name: "Checkout code",
-          uses: "actions/checkout@v4",
-        },
-        {
-          name: "Download build artifacts",
-          uses: "actions/download-artifact@v3",
-          with: {
-            name: "build-files",
-            path: "dist/",
-          },
-        },
-        {
-          name: "Deploy to ${{ github.event.inputs.environment || 'staging' }}",
-          run: "echo 'Deploying to ${{ github.event.inputs.environment || 'staging' }}'",
-        },
-        {
-          name: "Run health check",
-          run: "curl -f https://${{ github.event.inputs.environment || 'staging' }}.example.com/health",
-        },
-      ],
-    },
-  },
-};
-
 export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   // Initial state
-  workflow: defaultWorkflow,
+  workflow: DEFAULT_WORKFLOW,
   nodes: [],
   edges: [],
   selectedNode: null,
@@ -654,7 +439,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   resetToDefault: () => {
     set({
-      workflow: defaultWorkflow,
+      workflow: DEFAULT_WORKFLOW,
       selectedNode: null,
       isValid: true,
       errors: [],

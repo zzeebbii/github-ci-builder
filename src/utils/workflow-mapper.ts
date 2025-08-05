@@ -5,6 +5,7 @@ import type {
   Job,
   Step,
 } from "../types/github-actions";
+import { SIMPLE_WORKFLOW } from "../data/default-workflows";
 
 /**
  * Utility class for mapping between GitHub Actions YAML and visual representation
@@ -397,45 +398,7 @@ export class WorkflowMapper {
    * Generate a default workflow structure
    */
   static createDefaultWorkflow(): GitHubWorkflow {
-    return {
-      name: "CI",
-      on: {
-        push: {
-          branches: ["main"],
-        },
-        pull_request: {
-          branches: ["main"],
-        },
-      },
-      jobs: {
-        build: {
-          name: "Build and Test",
-          "runs-on": "ubuntu-latest",
-          steps: [
-            {
-              name: "Checkout code",
-              uses: "actions/checkout@v4",
-            },
-            {
-              name: "Setup Node.js",
-              uses: "actions/setup-node@v4",
-              with: {
-                "node-version": "20.x",
-                cache: "npm",
-              },
-            },
-            {
-              name: "Install dependencies",
-              run: "npm ci",
-            },
-            {
-              name: "Run tests",
-              run: "npm test",
-            },
-          ],
-        },
-      },
-    };
+    return SIMPLE_WORKFLOW;
   }
 
   /**
