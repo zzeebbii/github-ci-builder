@@ -5,12 +5,10 @@ import {
   Controls,
   MiniMap,
   BackgroundVariant,
-  Panel,
   applyNodeChanges,
   applyEdgeChanges,
 } from "@xyflow/react";
 import type { Connection, Node, NodeChange, EdgeChange } from "@xyflow/react";
-import { LayoutGrid, Shuffle } from "lucide-react";
 import { useWorkflowStore } from "../store/workflow";
 import type { VisualNode, VisualEdge } from "../types/github-actions";
 import TriggerNode from "./nodes/TriggerNode";
@@ -37,7 +35,6 @@ export default function WorkflowCanvas() {
     validateConnection,
     addToast,
     setSelectedNode,
-    syncFromVisual,
   } = useWorkflowStore();
 
   const onNodesChange = useCallback(
@@ -73,7 +70,9 @@ export default function WorkflowCanvas() {
         id: `${params.source}-${params.target}`,
         source: params.source,
         target: params.target,
-        type: "flow" as const,
+        sourceHandle: params.sourceHandle || undefined,
+        targetHandle: params.targetHandle || undefined,
+        type: "default" as const,
         animated: true,
       };
       addStoreEdge(newEdge);

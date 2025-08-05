@@ -67,37 +67,44 @@ export class WorkflowMapper {
       nodeIndex++;
 
       // Create step nodes for this job
-      job.steps.forEach((step, stepIndex) => {
-        const stepNodeId = `${nodeId}-step-${stepIndex}`;
-        const stepNode: VisualNode = {
-          id: stepNodeId,
-          type: "step",
-          position: getPosition(),
-          data: {
-            label:
-              step.name ||
-              step.uses ||
-              step.run?.substring(0, 30) + "..." ||
-              `Step ${stepIndex + 1}`,
-            step,
-            isValid: true,
-            errors: [],
-          },
-        };
-        nodes.push(stepNode);
-        nodeIndex++;
+      if (job.steps && job.steps.length > 0) {
+        job.steps.forEach((step, stepIndex) => {
+          const stepNodeId = `${nodeId}-step-${stepIndex}`;
 
-        // Connect job to its first step, or previous step to current step
-        const sourceId =
-          stepIndex === 0 ? nodeId : `${nodeId}-step-${stepIndex - 1}`;
-        edges.push({
-          id: `${sourceId}-${stepNodeId}`,
-          source: sourceId,
-          target: stepNodeId,
-          type: "flow",
-          animated: true,
+          const stepNode: VisualNode = {
+            id: stepNodeId,
+            type: "step",
+            position: getPosition(),
+            data: {
+              label:
+                step.name ||
+                step.uses ||
+                step.run?.substring(0, 30) + "..." ||
+                `Step ${stepIndex + 1}`,
+              step,
+              isValid: true,
+              errors: [],
+            },
+          };
+          nodes.push(stepNode);
+          nodeIndex++;
+
+          // Connect job to its first step, or previous step to current step
+          const sourceId =
+            stepIndex === 0 ? nodeId : `${nodeId}-step-${stepIndex - 1}`;
+          const edgeId = `${sourceId}-${stepNodeId}`;
+
+          edges.push({
+            id: edgeId,
+            source: sourceId,
+            target: stepNodeId,
+            sourceHandle: stepIndex === 0 ? "job-source" : "step-source",
+            targetHandle: "step-target",
+            type: "default",
+            animated: true,
+          });
         });
-      });
+      }
     });
 
     // Create job dependency edges
@@ -114,7 +121,9 @@ export class WorkflowMapper {
               id: `${sourceNodeId}-${targetNodeId}`,
               source: sourceNodeId,
               target: targetNodeId,
-              type: "dependency",
+              sourceHandle: "job-source",
+              targetHandle: "job-target",
+              type: "default",
               animated: false,
             });
           }
@@ -125,7 +134,9 @@ export class WorkflowMapper {
           id: `trigger-${targetNodeId}`,
           source: "trigger",
           target: targetNodeId,
-          type: "flow",
+          sourceHandle: "trigger-source",
+          targetHandle: "job-target",
+          type: "default",
           animated: true,
         });
       }

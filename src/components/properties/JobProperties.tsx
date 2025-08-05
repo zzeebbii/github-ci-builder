@@ -25,6 +25,16 @@ export default function JobProperties({
     (nodeData.permissions as string) || ""
   );
 
+  // Reset state when nodeData changes (when switching between nodes)
+  useEffect(() => {
+    setLabel((nodeData.label as string) || "");
+    setRunsOn((nodeData.runsOn as string) || "ubuntu-latest");
+    setTimeoutMinutes((nodeData.timeoutMinutes as number) || 360);
+    setStrategy((nodeData.strategy as string) || "");
+    setEnvironment((nodeData.environment as string) || "");
+    setPermissions((nodeData.permissions as string) || "");
+  }, [nodeData]);
+
   const validateJob = useCallback(() => {
     if (!label.trim()) return false;
     if (!runsOn.trim()) return false;

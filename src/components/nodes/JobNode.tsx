@@ -40,6 +40,7 @@ function JobNode({ data, selected }: NodeProps & { data: JobNodeData }) {
       <Handle
         type="target"
         position={Position.Top}
+        id="job-target"
         className="w-3 h-3 !bg-purple-400 !border-2 !border-white"
       />
 
@@ -72,6 +73,7 @@ function JobNode({ data, selected }: NodeProps & { data: JobNodeData }) {
       <Handle
         type="source"
         position={Position.Bottom}
+        id="job-source"
         className="w-3 h-3 !bg-purple-400 !border-2 !border-white"
       />
     </div>

@@ -30,6 +30,20 @@ export default function StepProperties({
   const [continueOnError, setContinueOnError] = useState(
     (nodeData.continueOnError as boolean) || false
   );
+
+  // Reset state when nodeData changes (when switching between nodes)
+  useEffect(() => {
+    setLabel((nodeData.label as string) || "");
+    setStepType((nodeData.type as string) || "action");
+    setActionName((nodeData.actionName as string) || "");
+    setActionVersion((nodeData.actionVersion as string) || "");
+    setRunCommand((nodeData.runCommand as string) || "");
+    setShell((nodeData.shell as string) || "bash");
+    setWorkingDirectory((nodeData.workingDirectory as string) || "");
+    setContinueOnError((nodeData.continueOnError as boolean) || false);
+    setCondition((nodeData.condition as string) || "");
+  }, [nodeData]);
+
   const [condition, setCondition] = useState(
     (nodeData.condition as string) || ""
   );

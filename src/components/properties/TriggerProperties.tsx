@@ -31,6 +31,11 @@ export default function TriggerProperties({
   const [label, setLabel] = useState((nodeData.label as string) || "");
   const [triggers, setTriggers] = useState<WorkflowTriggers>(workflow.on);
 
+  // Reset state when nodeData changes (when switching between nodes)
+  useEffect(() => {
+    setLabel((nodeData.label as string) || "");
+  }, [nodeData]);
+
   // Sync with workflow triggers when they change
   useEffect(() => {
     setTriggers(workflow.on);

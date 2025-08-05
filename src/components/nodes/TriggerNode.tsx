@@ -138,6 +138,7 @@ function TriggerNode({
       <Handle
         type="source"
         position={Position.Bottom}
+        id="trigger-source"
         className="w-3 h-3 !bg-blue-400 !border-2 !border-white"
       />
     </div>

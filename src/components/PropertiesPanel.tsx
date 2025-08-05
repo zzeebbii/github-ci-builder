@@ -67,15 +67,24 @@ export default function PropertiesPanel({
 
   const renderPropertiesForm = () => {
     if (showWorkflowProperties) {
-      return <WorkflowProperties onUpdate={handleUpdateWorkflow} />;
+      return (
+        <WorkflowProperties
+          key="workflow-properties"
+          onUpdate={handleUpdateWorkflow}
+        />
+      );
     }
 
     if (!selectedNodeData) return null;
+
+    // Use the node ID as key to force re-render when switching nodes
+    const nodeKey = `${selectedNodeData.type}-${selectedNodeData.id}`;
 
     switch (selectedNodeData.type) {
       case "trigger":
         return (
           <TriggerProperties
+            key={nodeKey}
             nodeData={selectedNodeData.data}
             onUpdate={handleUpdateNode}
           />
@@ -83,6 +92,7 @@ export default function PropertiesPanel({
       case "job":
         return (
           <JobProperties
+            key={nodeKey}
             nodeData={selectedNodeData.data}
             onUpdate={handleUpdateNode}
           />
@@ -90,6 +100,7 @@ export default function PropertiesPanel({
       case "step":
         return (
           <StepProperties
+            key={nodeKey}
             nodeData={selectedNodeData.data}
             onUpdate={handleUpdateNode}
           />

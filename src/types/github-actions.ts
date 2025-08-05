@@ -390,7 +390,9 @@ export interface VisualEdge {
   id: string;
   source: string;
   target: string;
-  type?: "dependency" | "flow";
+  sourceHandle?: string;
+  targetHandle?: string;
+  type?: "default" | "straight" | "step" | "smoothstep" | "dependency" | "flow";
   animated?: boolean;
 }
 
