@@ -140,7 +140,8 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     set((state) => ({
       workflow: { ...state.workflow, ...updates },
     }));
-    get().syncToVisual();
+    // Don't call syncToVisual() for workflow property updates
+    // syncToVisual is for syncing workflow structure to visual nodes/edges
     get().validateWorkflow();
   },
 

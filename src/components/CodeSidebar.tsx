@@ -26,27 +26,44 @@ export default function CodeSidebar({ isVisible, onToggle }: CodeSidebarProps) {
   // Generate YAML content in real-time
   const { yamlContent, yamlError } = useMemo(() => {
     try {
-      // Create clean workflow object
-      const cleanWorkflow: Record<string, unknown> = {
-        name: workflow.name || "CI",
-        on: workflow.on || { push: { branches: ["main"] } },
-        jobs: workflow.jobs || {},
-      };
-
-      // Add additional properties if they exist
-      const workflowAny = workflow as unknown as Record<string, unknown>;
-      if (workflowAny.env) cleanWorkflow.env = workflowAny.env;
-      if (workflowAny.defaults) cleanWorkflow.defaults = workflowAny.defaults;
-      if (workflowAny.concurrency)
-        cleanWorkflow.concurrency = workflowAny.concurrency;
-      if (workflowAny.permissions)
-        cleanWorkflow.permissions = workflowAny.permissions;
+      // Create clean workflow object with proper property ordering
+      const cleanWorkflow: Record<string, unknown> = {};
+      
+      // Add name
+      cleanWorkflow.name = workflow.name || "CI";
+      
+      // Add run-name if it exists
+      if (workflow["run-name"]) {
+        cleanWorkflow["run-name"] = workflow["run-name"];
+      }
+      
+      // Add triggers
+      cleanWorkflow.on = workflow.on || { push: { branches: ["main"] } };
+      
+      // Add env if it exists
+      if (workflow.env && Object.keys(workflow.env).length > 0) {
+        cleanWorkflow.env = workflow.env;
+      }
+      
+      // Add permissions if they exist
+      if (workflow.permissions && Object.keys(workflow.permissions).length > 0) {
+        cleanWorkflow.permissions = workflow.permissions;
+      }
+      
+      // Add other properties if they exist
+      if (workflow.defaults) cleanWorkflow.defaults = workflow.defaults;
+      if (workflow.concurrency) cleanWorkflow.concurrency = workflow.concurrency;
+      
+      // Add jobs
+      cleanWorkflow.jobs = workflow.jobs || {};
 
       const yamlContent = yaml.dump(cleanWorkflow, {
         indent: 2,
         lineWidth: -1,
         noRefs: true,
         sortKeys: false,
+        quotingType: '"',
+        forceQuotes: false,
       });
 
       return { yamlContent, yamlError: "" };

@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
 import { Play, Code, Package, AlertCircle, CheckCircle } from "lucide-react";
+import { useWorkflowStore } from "../../store/workflow";
 
 interface StepNodeData {
   label: string;
@@ -11,9 +12,17 @@ interface StepNodeData {
   errors?: string[];
 }
 
-function StepNode({ data, selected }: NodeProps & { data: StepNodeData }) {
+function StepNode({ data, selected, id }: NodeProps & { data: StepNodeData }) {
   const hasErrors = data.errors && data.errors.length > 0;
   const isValid = data.isValid !== false;
+  const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
+
+  const handleClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (id) {
+      setSelectedNode(id);
+    }
+  };
 
   const getIcon = () => {
     switch (data.type) {
@@ -43,8 +52,10 @@ function StepNode({ data, selected }: NodeProps & { data: StepNodeData }) {
 
   return (
     <div
+      onClick={handleClick}
       className={`
-        px-3 py-2 shadow-md rounded-lg bg-gradient-to-r text-white min-w-[140px]
+        px-3 py-2 shadow-md rounded-lg bg-gradient-to-r text-white min-w-[140px] cursor-pointer
+        transition-all duration-200 hover:shadow-lg
         ${selected ? "ring-2 ring-green-300 ring-offset-2" : ""}
         ${hasErrors ? "border-red-400" : "border-2"}
         ${getTypeColor()}

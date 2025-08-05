@@ -13,47 +13,13 @@ export default function WorkflowProperties({
   onUpdate,
 }: WorkflowPropertiesProps) {
   const { workflow } = useWorkflowStore();
-  const [formData, setFormData] = useState({
-    name: workflow.name || "",
-    runName: workflow["run-name"] || "",
-    env: workflow.env || {},
-    permissions: workflow.permissions || {},
-  });
 
   // Trigger configuration
   const [triggers, setTriggers] = useState<WorkflowTriggers>(workflow.on);
 
   useEffect(() => {
-    setFormData({
-      name: workflow.name || "",
-      runName: workflow["run-name"] || "",
-      env: workflow.env || {},
-      permissions: workflow.permissions || {},
-    });
     setTriggers(workflow.on);
   }, [workflow]);
-
-  const handleFormChange = (
-    field: string,
-    value: string | Record<string, string> | Record<string, unknown>
-  ) => {
-    const newFormData = { ...formData, [field]: value };
-    setFormData(newFormData);
-
-    // Update the workflow
-    const updates: Partial<GitHubWorkflow> = {
-      name: newFormData.name || undefined,
-      "run-name": newFormData.runName || undefined,
-      env:
-        Object.keys(newFormData.env).length > 0 ? newFormData.env : undefined,
-      permissions:
-        Object.keys(newFormData.permissions).length > 0
-          ? newFormData.permissions
-          : undefined,
-    };
-
-    onUpdate(updates);
-  };
 
   const handleTriggerChange = (newTriggers: WorkflowTriggers) => {
     setTriggers(newTriggers);
@@ -62,17 +28,26 @@ export default function WorkflowProperties({
 
   const addEnvVariable = () => {
     const key = prompt("Enter environment variable name:");
+    if (!key || key.trim() === "") return;
+    
     const value = prompt("Enter environment variable value:");
-    if (key && value) {
-      const newEnv = { ...formData.env, [key]: value };
-      handleFormChange("env", newEnv);
-    }
+    if (value === null) return; // User cancelled
+    
+    const trimmedKey = key.trim();
+    const currentEnv = workflow.env || {};
+    const newEnv = { ...currentEnv, [trimmedKey]: value };
+    
+    // Update workflow directly - the UI will re-render from workflow state
+    onUpdate({ env: newEnv });
   };
 
   const removeEnvVariable = (key: string) => {
-    const newEnv = { ...formData.env };
+    const currentEnv = workflow.env || {};
+    const newEnv = { ...currentEnv };
     delete newEnv[key];
-    handleFormChange("env", newEnv);
+    
+    // Update workflow directly - the UI will re-render from workflow state
+    onUpdate({ env: Object.keys(newEnv).length > 0 ? newEnv : undefined });
   };
 
   const toggleTrigger = (triggerType: keyof WorkflowTriggers) => {
@@ -117,8 +92,8 @@ export default function WorkflowProperties({
             type="text"
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="CI"
-            value={formData.name}
-            onChange={(e) => handleFormChange("name", e.target.value)}
+            value={workflow.name || ""}
+            onChange={(e) => onUpdate({ name: e.target.value || undefined })}
           />
         </div>
 
@@ -130,8 +105,8 @@ export default function WorkflowProperties({
             type="text"
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Deploy by @${{ github.actor }}"
-            value={formData.runName}
-            onChange={(e) => handleFormChange("runName", e.target.value)}
+            value={workflow["run-name"] || ""}
+            onChange={(e) => onUpdate({ "run-name": e.target.value || undefined })}
           />
         </div>
       </div>
@@ -208,20 +183,24 @@ export default function WorkflowProperties({
           </button>
         </div>
 
-        {Object.entries(formData.env).length === 0 ? (
+        {Object.entries(workflow.env || {}).length === 0 ? (
           <div className="text-xs text-gray-500 italic">
             No environment variables configured
           </div>
         ) : (
           <div className="space-y-2">
-            {Object.entries(formData.env).map(([key, value]) => (
-              <div key={key} className="flex items-center gap-2 text-xs">
+            {Object.entries(workflow.env || {}).map(([key, value]) => (
+              <div 
+                key={key} 
+                className="flex items-center gap-2 text-xs"
+              >
                 <code className="bg-gray-100 px-2 py-1 rounded font-mono text-gray-800 flex-1">
-                  {key}={value}
+                  {key}={String(value)}
                 </code>
                 <button
                   onClick={() => removeEnvVariable(key)}
-                  className="text-red-600 hover:text-red-800"
+                  className="text-red-600 hover:text-red-800 font-bold text-sm"
+                  title={`Remove ${key}`}
                 >
                   ×
                 </button>
@@ -252,12 +231,12 @@ export default function WorkflowProperties({
               <input
                 type="checkbox"
                 checked={
-                  !!(formData.permissions as Record<string, unknown>)[
+                  !!(workflow.permissions as Record<string, unknown> || {})[
                     permission
                   ]
                 }
                 onChange={(e) => {
-                  const newPermissions = { ...formData.permissions };
+                  const newPermissions = { ...(workflow.permissions || {}) };
                   if (e.target.checked) {
                     (newPermissions as Record<string, string>)[permission] =
                       "read";
@@ -266,7 +245,11 @@ export default function WorkflowProperties({
                       permission
                     ];
                   }
-                  handleFormChange("permissions", newPermissions);
+                  onUpdate({ 
+                    permissions: Object.keys(newPermissions).length > 0 
+                      ? newPermissions 
+                      : undefined 
+                  });
                 }}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />

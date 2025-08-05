@@ -18,6 +18,7 @@ function JobNode({ data, selected, id }: NodeProps & { data: JobNodeData }) {
   const toggleEdgeAnimation = useWorkflowStore(
     (state) => state.toggleEdgeAnimation
   );
+  const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
   const animatedEdges = useWorkflowStore((state) => state.animatedEdges);
   const edges = useWorkflowStore((state) => state.edges);
   const nodes = useWorkflowStore((state) => state.nodes);
@@ -48,6 +49,10 @@ function JobNode({ data, selected, id }: NodeProps & { data: JobNodeData }) {
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     if (id) {
+      // First set the selected node for properties panel
+      setSelectedNode(id);
+      
+      // Then toggle edge animation
       toggleEdgeAnimation(id);
     }
   };

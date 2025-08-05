@@ -11,6 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import type { WorkflowTriggers } from "../../types/github-actions";
+import { useWorkflowStore } from "../../store/workflow";
 
 interface TriggerNodeData {
   label: string;
@@ -23,10 +24,15 @@ interface TriggerNodeData {
 function TriggerNode({
   data,
   selected,
+  id,
 }: NodeProps & { data: TriggerNodeData }) {
+  const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
+  
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
-    // Trigger nodes don't toggle animations anymore
+    if (id) {
+      setSelectedNode(id);
+    }
   };
   const getTriggerIcon = (triggerType: string) => {
     switch (triggerType) {
