@@ -34,6 +34,8 @@ jobs:
 
       - name: 🔨 Build for production
         run: npm run build
+        env:
+          VITE_BASE_PATH: "/github-ci-builder/"
 
       - name: � Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
