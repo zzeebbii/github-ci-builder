@@ -35,7 +35,47 @@ export default function WorkflowCanvas() {
     validateConnection,
     addToast,
     setSelectedNode,
+    animatedEdges,
   } = useWorkflowStore();
+
+  // Apply animation state to edges
+  const animatedEdgesArray = edges.map((edge) => {
+    const isAnimated = animatedEdges.has(edge.id);
+
+    if (isAnimated) {
+      // Enhanced styling for animated job-to-job dependency edges
+      return {
+        ...edge,
+        animated: true,
+        style: {
+          ...edge.style,
+          stroke: "#ff6b35", // Bright orange for animated edges
+          strokeWidth: 5, // Much thicker for job dependencies
+          strokeDasharray: "12,6", // Keep dashed but more pronounced
+          filter: "drop-shadow(0px 0px 8px rgba(255, 107, 53, 0.8))", // Stronger glow effect
+          animation: "pulse 1.5s infinite", // Faster pulsing animation
+        },
+        labelStyle: {
+          ...edge.labelStyle,
+          fill: "#ff6b35",
+          fontWeight: 800, // Even bolder
+          fontSize: 13, // Larger text
+        },
+        labelBgStyle: {
+          ...edge.labelBgStyle,
+          fill: "#fff3f0",
+          stroke: "#ff6b35",
+          strokeWidth: 2,
+          fillOpacity: 0.98,
+        },
+      };
+    }
+
+    return {
+      ...edge,
+      animated: false,
+    };
+  });
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -180,7 +220,7 @@ export default function WorkflowCanvas() {
 
       <ReactFlow
         nodes={nodes}
-        edges={edges}
+        edges={animatedEdgesArray}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Play,
   Upload,
@@ -25,9 +25,26 @@ export default function BuilderView() {
   const [showCodeSidebar, setShowCodeSidebar] = useState(false);
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const { selectedNode, showWorkflowProperties, setShowWorkflowProperties } =
-    useWorkflowStore();
+  const {
+    selectedNode,
+    showWorkflowProperties,
+    setShowWorkflowProperties,
+    clearEdgeAnimations,
+  } = useWorkflowStore();
   const { canUndo, canRedo, undo, redo, history } = useHistoryStore();
+
+  // Add keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Clear edge animations on Escape key
+      if (event.key === "Escape") {
+        clearEdgeAnimations();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [clearEdgeAnimations]);
 
   // Automatically show left properties panel when there's something to show
   const showPropertiesLeft = !!(selectedNode || showWorkflowProperties);

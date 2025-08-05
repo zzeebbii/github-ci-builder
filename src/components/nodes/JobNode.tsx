@@ -1,7 +1,8 @@
 import { memo } from "react";
 import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
-import { Server, AlertCircle, CheckCircle } from "lucide-react";
+import { Server, AlertCircle, CheckCircle, Zap } from "lucide-react";
+import { useWorkflowStore } from "../../store/workflow";
 
 interface JobNodeData {
   label: string;
@@ -11,9 +12,30 @@ interface JobNodeData {
   errors?: string[];
 }
 
-function JobNode({ data, selected }: NodeProps & { data: JobNodeData }) {
+function JobNode({ data, selected, id }: NodeProps & { data: JobNodeData }) {
   const hasErrors = data.errors && data.errors.length > 0;
   const isValid = data.isValid !== false;
+  const toggleEdgeAnimation = useWorkflowStore(
+    (state) => state.toggleEdgeAnimation
+  );
+  const animatedEdges = useWorkflowStore((state) => state.animatedEdges);
+  const edges = useWorkflowStore((state) => state.edges);
+  const nodes = useWorkflowStore((state) => state.nodes);
+
+  // Check if this node has any animated job-to-job edges (both incoming and outgoing)
+  const hasAnimatedEdges = Array.from(animatedEdges).some((edgeId) => {
+    const edge = edges.find((e) => e.id === edgeId);
+    if (!edge) return false;
+
+    // Check if this edge connects to this node (either as source or target)
+    const isConnectedToNode = edge.source === id || edge.target === id;
+    if (!isConnectedToNode) return false;
+
+    // Check if both source and target are job nodes
+    const sourceNode = nodes.find((n) => n.id === edge.source);
+    const targetNode = nodes.find((n) => n.id === edge.target);
+    return sourceNode?.type === "job" && targetNode?.type === "job";
+  });
 
   const getRunnerColor = () => {
     if (!data.runsOn || typeof data.runsOn !== "string") return "text-gray-600";
@@ -23,16 +45,32 @@ function JobNode({ data, selected }: NodeProps & { data: JobNodeData }) {
     return "text-gray-600";
   };
 
+  const handleClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (id) {
+      toggleEdgeAnimation(id);
+    }
+  };
+
   return (
     <div
+      onClick={handleClick}
       className={`
-        px-4 py-3 shadow-md rounded-lg bg-white border-2 min-w-[180px]
+        px-4 py-3 shadow-md rounded-lg bg-white border-2 min-w-[180px] cursor-pointer
+        transition-all duration-200 hover:shadow-lg hover:scale-105
         ${selected ? "ring-2 ring-purple-300 ring-offset-2" : ""}
+        ${
+          hasAnimatedEdges
+            ? "ring-2 ring-orange-400 ring-offset-1 shadow-orange-200 shadow-lg"
+            : ""
+        }
         ${
           hasErrors
             ? "border-red-400"
             : isValid
-            ? "border-purple-400"
+            ? hasAnimatedEdges
+              ? "border-orange-400"
+              : "border-purple-400"
             : "border-gray-300"
         }
       `}
@@ -47,6 +85,9 @@ function JobNode({ data, selected }: NodeProps & { data: JobNodeData }) {
       <div className="flex items-center gap-2 mb-2">
         <Server className="w-4 h-4 text-purple-600" />
         <div className="font-medium text-sm text-gray-900">{data.label}</div>
+        {hasAnimatedEdges && (
+          <Zap className="w-4 h-4 text-orange-500 animate-pulse" />
+        )}
         {hasErrors ? (
           <AlertCircle className="w-4 h-4 text-red-500" />
         ) : isValid ? (

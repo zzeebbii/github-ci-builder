@@ -24,6 +24,10 @@ function TriggerNode({
   data,
   selected,
 }: NodeProps & { data: TriggerNodeData }) {
+  const handleClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    // Trigger nodes don't toggle animations anymore
+  };
   const getTriggerIcon = (triggerType: string) => {
     switch (triggerType) {
       case "push":
@@ -77,9 +81,11 @@ function TriggerNode({
 
   return (
     <div
+      onClick={handleClick}
       className={`
         px-4 py-3 shadow-md rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 
-        border-2 text-white min-w-[180px] max-w-[250px]
+        border-2 text-white min-w-[180px] max-w-[250px] cursor-pointer
+        transition-all duration-200 hover:shadow-lg hover:scale-105
         ${selected ? "ring-2 ring-blue-300 ring-offset-2" : ""}
         ${hasErrors ? "border-red-400" : "border-blue-700"}
       `}

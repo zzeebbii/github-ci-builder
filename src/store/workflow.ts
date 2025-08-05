@@ -61,6 +61,7 @@ interface WorkflowState {
   errors: string[];
   validationResult: ValidationResult | null;
   toasts: ToastItem[];
+  animatedEdges: Set<string>; // New state for tracking animated edges
 
   // Actions
   setWorkflow: (workflow: GitHubWorkflow) => void;
@@ -95,6 +96,8 @@ interface WorkflowState {
     nodes: VisualNode[];
     edges: VisualEdge[];
   }) => void;
+  toggleEdgeAnimation: (nodeId: string) => void; // New method for toggling edge animation
+  clearEdgeAnimations: () => void; // New method to clear all animations
 }
 
 // Default workflow structure - Comprehensive CI/CD Pipeline
@@ -324,6 +327,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   errors: [],
   validationResult: null,
   toasts: [],
+  animatedEdges: new Set<string>(), // Initialize animated edges set
 
   // Actions
   setWorkflow: (workflow) => {
@@ -685,6 +689,57 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       selectedNode: null,
     });
     get().validateWorkflow();
+  },
+
+  toggleEdgeAnimation: (nodeId: string) => {
+    const { edges, nodes } = get();
+
+    // Find all edges that connect this job node to other job nodes (both incoming and outgoing)
+    const jobToJobEdges = edges.filter((edge) => {
+      // Check if this edge connects to the clicked node (either as source or target)
+      const isConnectedToNode =
+        edge.source === nodeId || edge.target === nodeId;
+      if (!isConnectedToNode) return false;
+
+      // Check if both source and target are job nodes
+      const sourceNode = nodes.find((n) => n.id === edge.source);
+      const targetNode = nodes.find((n) => n.id === edge.target);
+
+      return sourceNode?.type === "job" && targetNode?.type === "job";
+    });
+
+    set((state) => {
+      // Check if any job-to-job edge connected to this node is currently animated
+      const hasAnimatedEdge = jobToJobEdges.some((edge) =>
+        state.animatedEdges.has(edge.id)
+      );
+
+      if (hasAnimatedEdge) {
+        // If this node's edges are animated, clear all animations (deselect)
+        return { animatedEdges: new Set<string>() };
+      } else {
+        // Clear all previous animations and add only this node's job-to-job edges
+        const newAnimatedEdges = new Set<string>();
+        jobToJobEdges.forEach((edge) => {
+          newAnimatedEdges.add(edge.id);
+        });
+
+        return { animatedEdges: newAnimatedEdges };
+      }
+    });
+  },
+
+  clearEdgeAnimations: () => {
+    const { edges } = get();
+    const updatedEdges = edges.map((edge) => ({
+      ...edge,
+      animated: false,
+    }));
+
+    set({
+      edges: updatedEdges,
+      animatedEdges: new Set<string>(),
+    });
   },
 }));
 
