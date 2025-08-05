@@ -16,6 +16,7 @@ export default function PropertiesPanel({
   onClose,
 }: PropertiesPanelProps) {
   const {
+    workflow,
     selectedNode,
     nodes,
     showWorkflowProperties,
@@ -69,7 +70,7 @@ export default function PropertiesPanel({
     if (showWorkflowProperties) {
       return (
         <WorkflowProperties
-          key="workflow-properties"
+          key={`workflow-properties-${workflow.name || "default"}`}
           onUpdate={handleUpdateWorkflow}
         />
       );

@@ -8,6 +8,8 @@
 
 - 🎨 **Visual Workflow Designer**: Drag-and-drop interface with nodes and connections
 - 🔄 **Bidirectional Conversion**: YAML ↔ Visual representation
+- 🐙 **GitHub Integration**: OAuth/PAT authentication, repository browsing, workflow import
+- 📚 **Template Marketplace**: 10+ specialized workflow templates with filtering and preview
 - 🎯 **Real-time Validation**: GitHub Actions schema validation
 - 🖥️ **Code Editor**: Monaco Editor integration with syntax highlighting
 - 📚 **Properties Panels**: Configure triggers, jobs, and steps
@@ -23,31 +25,36 @@
 - **Vite 7.0.6** - Build tool and dev server
 - **Tailwind CSS** - Styling with @tailwindcss/vite plugin
 - **React Flow (@xyflow/react)** - Node-based visual interface
-- **Zustand** - State management
+- **Zustand** - State management with persistence
 - **Monaco Editor (@monaco-editor/react)** - Code editor
 - **React Hook Form + Zod** - Form handling and validation
 - **js-yaml** - YAML parsing and serialization
 - **Lucide React** - Icon library
+- **@octokit/rest + @octokit/auth-oauth-app** - GitHub API integration
+- **React Router DOM** - Client-side routing
 
 ### Project Structure
 
 ```
 src/
 ├── components/
-│   ├── layout/           # Header, Sidebar
-│   ├── views/            # BuilderView, ImportView
+│   ├── layout/           # Header, Sidebar, PropertiesPanel
+│   ├── views/            # BuilderView, ImportView, RepositoryBrowser, TemplateBrowserView
 │   ├── nodes/            # TriggerNode, JobNode, StepNode
 │   ├── properties/       # Property panels for each node type
+│   ├── auth/             # GitHub authentication components
 │   └── ui/               # Reusable UI components
 ├── data/
-│   └── default-workflows.ts # Default workflow templates with icons
+│   └── default-workflows.ts # Default workflow templates with specialized examples
 ├── store/
 │   ├── workflow.ts       # Main workflow state (Zustand)
-│   └── history.ts        # Undo/redo system
+│   ├── history.ts        # Undo/redo system
+│   └── github.ts         # GitHub authentication & API state
 ├── types/
 │   └── github-actions.ts # Comprehensive GitHub Actions TypeScript interfaces
 ├── utils/
-│   └── workflow-mapper.ts # YAML ↔ Visual conversion logic
+│   ├── workflow-mapper.ts # YAML ↔ Visual conversion logic
+│   └── github-service.ts  # GitHub API wrapper with Octokit
 └── styles/
     └── globals.css       # Global styles and Tailwind imports
 ```

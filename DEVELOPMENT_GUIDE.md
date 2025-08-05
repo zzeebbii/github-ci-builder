@@ -20,14 +20,19 @@ npm run build
 - `src/utils/workflow-mapper.ts` - YAML ↔ Visual conversion
 - `src/store/workflow.ts` - Main state management
 - `src/store/history.ts` - Undo/redo system
+- `src/store/github.ts` - GitHub authentication & API state
 - `src/data/default-workflows.ts` - Default workflow templates
+- `src/utils/github-service.ts` - GitHub API wrapper with Octokit
 
 ### Main Components
 
 - `src/components/views/BuilderView.tsx` - Main editor view
+- `src/components/views/RepositoryBrowser.tsx` - GitHub repository browser
+- `src/components/views/TemplateBrowserView.tsx` - Template marketplace
 - `src/components/WorkflowCanvas.tsx` - React Flow canvas
 - `src/components/nodes/` - All node components
 - `src/components/properties/` - Property panels
+- `src/components/auth/` - GitHub authentication components
 
 ### Types
 

@@ -11,6 +11,7 @@ import {
   PlayCircle,
   AlertCircle,
   RefreshCw,
+  ExternalLink,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useGitHubStore } from "../../store/github";
@@ -20,6 +21,7 @@ import type { GitHubRepository } from "../../store/github";
 import type { WorkflowFile } from "../../utils/github-service";
 import type { GitHubWorkflow } from "../../types/github-actions";
 import Button from "../ui/Button";
+import { GitHubAuthGuide } from "../auth/GitHubAuthGuide";
 import { load as parseYaml } from "js-yaml";
 
 interface RepositoryWithWorkflows extends GitHubRepository {
@@ -126,9 +128,20 @@ export function RepositoryBrowser() {
         workflow.path
       );
 
+      // Try to extract the workflow name from YAML content
+      let displayName = workflow.name;
+      try {
+        const workflowData = parseYaml(content) as GitHubWorkflow;
+        if (workflowData.name) {
+          displayName = workflowData.name;
+        }
+      } catch {
+        // If YAML parsing fails, just use the filename
+      }
+
       setWorkflowPreview({
         content,
-        filename: workflow.name,
+        filename: displayName,
         repo: repo.full_name,
       });
     } catch (error) {
@@ -159,7 +172,7 @@ export function RepositoryBrowser() {
 
       // Load into the workflow store
       setWorkflow({
-        name: workflow.name.replace(/\.(yml|yaml)$/, ""),
+        name: workflowData.name || workflow.name.replace(/\.(yml|yaml)$/, ""),
         on: workflowData.on || {},
         jobs: workflowData.jobs || {},
         env: workflowData.env || {},
@@ -169,8 +182,10 @@ export function RepositoryBrowser() {
 
       addToast(`Imported ${workflow.name} successfully!`, "success");
 
-      // Navigate to builder
-      navigate("/builder");
+      // Navigate to builder with a small delay to ensure state sync
+      setTimeout(() => {
+        navigate("/builder");
+      }, 100);
     } catch (error) {
       console.error("Failed to import workflow:", error);
       addToast(
@@ -205,15 +220,19 @@ export function RepositoryBrowser() {
   if (!isAuthenticated) {
     return (
       <div className="p-8">
-        <div className="max-w-2xl mx-auto text-center">
-          <GitBranch className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Connect to GitHub
-          </h2>
-          <p className="text-gray-600">
-            Connect your GitHub account to browse repositories and import
-            workflows.
-          </p>
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <GitBranch className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Connect to GitHub
+            </h2>
+            <p className="text-gray-600">
+              Connect your GitHub account to browse repositories and import
+              workflows.
+            </p>
+          </div>
+
+          <GitHubAuthGuide />
         </div>
       </div>
     );
@@ -342,8 +361,14 @@ function RepositoryCard({
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <h3 className="font-semibold text-lg text-blue-600 hover:text-blue-800">
-              <a href={repo.html_url} target="_blank" rel="noopener noreferrer">
+              <a
+                href={repo.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1"
+              >
                 {repo.name}
+                <ExternalLink className="w-4 h-4" />
               </a>
             </h3>
             {repo.private ? (

@@ -37,8 +37,18 @@ export default function CodeSidebar({ isVisible, onToggle }: CodeSidebarProps) {
         cleanWorkflow["run-name"] = workflow["run-name"];
       }
 
-      // Add triggers
-      cleanWorkflow.on = workflow.on || { push: { branches: ["main"] } };
+      // Add triggers (clean up null values)
+      const workflowTriggers = workflow.on || { push: { branches: ["main"] } };
+      const cleanTriggers = { ...workflowTriggers };
+
+      // Convert null values to empty objects for workflow_dispatch
+      Object.keys(cleanTriggers).forEach(key => {
+        if (cleanTriggers[key] === null) {
+          cleanTriggers[key] = {};
+        }
+      });
+
+      cleanWorkflow.on = cleanTriggers;
 
       // Add env if it exists
       if (workflow.env && Object.keys(workflow.env).length > 0) {

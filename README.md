@@ -22,6 +22,21 @@ A powerful visual drag-and-drop workflow designer for GitHub Actions. Design wor
 - **Visual to YAML**: Export your visual designs as valid GitHub Actions YAML
 - **Real-time preview** with Monaco Editor integration
 
+### 🐙 **GitHub Integration**
+
+- **OAuth & Personal Access Token** authentication support
+- **Repository browser** with workflow discovery and search
+- **One-click import** from your GitHub repositories
+- **Workflow preview** with proper name extraction from YAML
+- **Cross-origin request handling** with fallback authentication methods
+
+### 📚 **Template Marketplace**
+
+- **10+ specialized templates** including Security Scanner, Multi-Environment Deploy, and Monorepo CI
+- **Advanced filtering** by category, difficulty, and search terms
+- **Template preview** with estimated runtime calculations
+- **One-click template application** with loading states
+
 ### 🎯 **Intelligent Features**
 
 - **Schema validation** with real-time GitHub Actions rule checking
@@ -59,6 +74,32 @@ npm run dev
 
 The application will be available at `http://localhost:5173`
 
+### GitHub Integration Setup (Optional)
+
+To use GitHub integration features (repository browsing, workflow import):
+
+1. **Create a `.env` file** in the project root:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Choose your authentication method**:
+
+   **Option A: Personal Access Token (Recommended)**
+   - Go to GitHub → Settings → Developer settings → Personal access tokens
+   - Generate a new token with `repo` and `workflow` scopes
+   - Use the token in the app's authentication form
+
+   **Option B: GitHub OAuth App**
+   - Create a GitHub OAuth App in your GitHub settings
+   - Set the callback URL to your domain + `/auth/callback`
+   - Add your credentials to the `.env` file:
+     ```
+     GITHUB_CLIENT_ID=your_client_id
+     GITHUB_CLIENT_SECRET=your_client_secret
+     ```
+
 ### Build for Production
 
 ```bash
@@ -77,8 +118,18 @@ Choose from pre-built workflow templates or start from scratch:
 
 - 🚀 **Default CI/CD Pipeline**: Full-featured workflow with testing, linting, building, and deployment
 - ✨ **Simple Workflow**: Minimal setup for basic CI/CD needs
+- 🔒 **Security Scanner**: Automated security scanning and vulnerability detection
+- 🌍 **Multi-Environment Deploy**: Deploy to staging and production environments
+- 📦 **Monorepo CI**: Advanced CI for monorepo structures
 
-### 2. **Design Visually**
+### 2. **Import from GitHub**
+
+- **Connect your GitHub account** using OAuth or Personal Access Token
+- **Browse your repositories** with search and filtering
+- **Preview workflows** before importing
+- **One-click import** with automatic name extraction
+
+### 3. **Design Visually**
 
 - **Drag nodes** from the sidebar (Triggers, Jobs, Steps)
 - **Connect nodes** to define dependencies and flow

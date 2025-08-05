@@ -38,10 +38,19 @@ export interface GitHubAuthState {
   // Octokit instance
   octokit: Octokit | null;
 
+  // Device flow state
+  deviceCode: string | null;
+  userCode: string | null;
+  verificationUri: string | null;
+  isPollingForToken: boolean;
+
   // Actions
   setAccessToken: (token: string) => void;
   setUser: (user: GitHubUser) => void;
   authenticate: (code: string) => Promise<void>;
+  authenticateWithDeviceFlow: () => Promise<void>;
+  pollForDeviceToken: () => Promise<void>;
+  authenticateWithPersonalToken: (token: string) => Promise<void>;
   logout: () => void;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
@@ -68,6 +77,10 @@ export const useGitHubStore = create<GitHubAuthState>()(
       isAuthenticating: false,
       error: null,
       octokit: null,
+      deviceCode: null,
+      userCode: null,
+      verificationUri: null,
+      isPollingForToken: false,
 
       // Set access token and create Octokit instance
       setAccessToken: (token: string) => {
@@ -92,27 +105,30 @@ export const useGitHubStore = create<GitHubAuthState>()(
         try {
           set({ isAuthenticating: true, error: null });
 
-          // Exchange code for access token
-          // Note: In production, this should be done on the backend for security
-          const tokenResponse = await fetch(
-            "https://github.com/login/oauth/access_token",
-            {
-              method: "POST",
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                client_id: GITHUB_CLIENT_ID,
-                client_secret: GITHUB_CLIENT_SECRET,
-                code,
-                redirect_uri: GITHUB_REDIRECT_URI,
-              }),
-            }
-          );
+          // Use a CORS proxy for development to avoid CORS issues
+          // In production, this should be handled by your backend
+          const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+          const tokenUrl = "https://github.com/login/oauth/access_token";
+
+          const tokenResponse = await fetch(proxyUrl + tokenUrl, {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+            body: JSON.stringify({
+              client_id: GITHUB_CLIENT_ID,
+              client_secret: GITHUB_CLIENT_SECRET,
+              code,
+              redirect_uri: GITHUB_REDIRECT_URI,
+            }),
+          });
 
           if (!tokenResponse.ok) {
-            throw new Error("Failed to exchange code for token");
+            throw new Error(
+              `Failed to exchange code for token: ${tokenResponse.status}`
+            );
           }
 
           const tokenData = await tokenResponse.json();
@@ -122,6 +138,10 @@ export const useGitHubStore = create<GitHubAuthState>()(
           }
 
           const accessToken = tokenData.access_token;
+          if (!accessToken) {
+            throw new Error("No access token received from GitHub");
+          }
+
           setAccessToken(accessToken);
 
           // Fetch user information
@@ -170,6 +190,49 @@ export const useGitHubStore = create<GitHubAuthState>()(
       // Set loading state
       setLoading: (loading: boolean) => {
         set({ isLoading: loading });
+      },
+
+      // Authenticate with Personal Access Token (no CORS issues)
+      authenticateWithPersonalToken: async (token: string) => {
+        const { setAccessToken, setUser } = get();
+
+        try {
+          set({ isAuthenticating: true, error: null });
+
+          // Test the token by fetching user info
+          const octokit = new Octokit({ auth: token });
+          const { data: user } = await octokit.rest.users.getAuthenticated();
+
+          setAccessToken(token);
+          setUser({
+            id: user.id,
+            login: user.login,
+            name: user.name,
+            email: user.email,
+            avatar_url: user.avatar_url,
+            html_url: user.html_url,
+          });
+        } catch (error) {
+          console.error("GitHub token authentication error:", error);
+          set({
+            error: error instanceof Error ? error.message : "Invalid token",
+            isAuthenticated: false,
+            accessToken: null,
+            user: null,
+            octokit: null,
+          });
+        } finally {
+          set({ isAuthenticating: false });
+        }
+      },
+
+      // Device flow implementation (placeholder for now)
+      authenticateWithDeviceFlow: async () => {
+        set({ error: "Device flow not implemented yet" });
+      },
+
+      pollForDeviceToken: async () => {
+        // Placeholder for device flow polling
       },
     }),
     {

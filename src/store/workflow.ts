@@ -167,8 +167,15 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   },
 
   syncFromVisual: () => {
-    const { nodes, edges } = get();
+    const { nodes, edges, workflow: currentWorkflow } = get();
     const workflow = WorkflowMapper.visualToYaml(nodes, edges);
+
+    // Preserve the existing workflow name and other metadata
+    workflow.name = currentWorkflow.name || workflow.name;
+    if (currentWorkflow["run-name"]) {
+      workflow["run-name"] = currentWorkflow["run-name"];
+    }
+
     set({ workflow });
     get().validateWorkflow();
   },

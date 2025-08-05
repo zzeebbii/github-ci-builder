@@ -200,7 +200,16 @@ export class GitHubService {
       });
 
       if ("content" in data && data.content) {
-        return Buffer.from(data.content, "base64").toString();
+        // Use proper UTF-8 decoding for base64 content
+        const base64Content = data.content.replace(/\s/g, "");
+        const decodedBytes = atob(base64Content);
+
+        // Convert binary string to UTF-8
+        const utf8Content = new TextDecoder("utf-8").decode(
+          new Uint8Array(decodedBytes.split("").map(char => char.charCodeAt(0)))
+        );
+
+        return utf8Content;
       }
 
       throw new Error("File content not found");
