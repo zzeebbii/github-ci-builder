@@ -30,6 +30,53 @@
 - **Lucide React** - Icon library
 
 ### Project Structure
+```
+src/
+├── components/
+│   ├── layout/           # Header, Sidebar
+│   ├── views/            # BuilderView, ImportView
+│   ├── nodes/            # TriggerNode, JobNode, StepNode
+│   ├── properties/       # Property panels for each node type
+│   └── ui/               # Reusable UI components
+├── data/
+│   └── default-workflows.ts # Default workflow templates with icons
+├── store/
+│   ├── workflow.ts       # Main workflow state (Zustand)
+│   └── history.ts        # Undo/redo system
+├── types/
+│   └── github-actions.ts # Comprehensive GitHub Actions TypeScript interfaces
+├── utils/
+│   └── workflow-mapper.ts # YAML ↔ Visual conversion logic
+└── styles/
+    └── globals.css       # Global styles and Tailwind imports
+```
+
+## 🎯 Current State (as of Latest Commit)
+
+### Recent Major Enhancements
+
+1. **Refactored Default Workflows** (Commit: ae5d59d)
+   - Created `src/data/default-workflows.ts` with centralized workflow templates
+   - Added engaging icons (🚀🧪✨🏗️📥⚙️🔍🔧💄🔨📤🏥📢) to all names
+   - Simplified default workflow to 4 jobs with clear dependency structure:
+     - `test` and `lint` run in parallel (independent jobs)
+     - `build` depends on both `test` and `lint`
+     - `deploy` depends on `build`
+   - Support for multiple workflow templates (DEFAULT_WORKFLOW, SIMPLE_WORKFLOW)
+
+2. **Enhanced Workflow Layout** (Commit: 006ec0a)
+   - Job ordering: Independent jobs render first (left), dependent jobs second (right)
+   - Step node spacing: 120px vertical distance for optimal readability
+   - Center-aligned step nodes under parent jobs
+
+3. **Fixed Edge Animation System**
+   - Resolved selection bug where clicking job nodes didn't properly toggle animations
+   - Exclusive selection: only one job can have animated edges at a time
+   - Bidirectional animation for job-to-job connections with visual feedback
+
+4. **Refined Data Structure**
+   - Complete action name extraction and display in step nodes
+   - Proper handling of action versions, run commands, shell, working directory, etc.
 
 ```
 src/
@@ -290,8 +337,14 @@ const arrangedNodes = WorkflowMapper.applyWaterfallLayout(nodes);
 
 ## 🔄 Changelog
 
-### v1.0.0 (Latest - Commit: 006ec0a)
+### v1.1.0 (Latest - Commit: ae5d59d)
+- ✅ Refactored default workflows to separate file for better maintainability
+- ✅ Added engaging icons to workflow, job, and step names for better UX
+- ✅ Simplified default workflow to clear 4-job dependency structure
+- ✅ Created template system supporting multiple workflow types
+- ✅ Centralized workflow definitions in `src/data/default-workflows.ts`
 
+### v1.0.0 (Commit: 006ec0a)
 - ✅ Enhanced workflow layout with dependency-aware job ordering
 - ✅ Fixed edge animation selection bug with exclusive selection
 - ✅ Improved step node spacing (120px vertical distance)

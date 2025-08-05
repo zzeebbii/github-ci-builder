@@ -20,6 +20,7 @@ npm run build
 - `src/utils/workflow-mapper.ts` - YAML ↔ Visual conversion
 - `src/store/workflow.ts` - Main state management
 - `src/store/history.ts` - Undo/redo system
+- `src/data/default-workflows.ts` - Default workflow templates
 
 ### Main Components
 
@@ -33,6 +34,12 @@ npm run build
 - `src/types/github-actions.ts` - All TypeScript interfaces
 
 ## 🎯 Common Development Tasks
+
+### Adding New Workflow Templates
+1. Add new template to `src/data/default-workflows.ts`
+2. Export it in `WORKFLOW_TEMPLATES` object
+3. Update `WorkflowTemplateKey` type
+4. Consider adding template selector UI
 
 ### Adding a New Node Type
 
