@@ -95,7 +95,9 @@ export default function WorkflowCanvas() {
 
   const onConnect = useCallback(
     (params: Connection) => {
-      if (!params.source || !params.target) {return;}
+      if (!params.source || !params.target) {
+        return;
+      }
 
       // Validate the connection
       const validation = validateConnection(params.source, params.target);
@@ -126,7 +128,9 @@ export default function WorkflowCanvas() {
       const source = "source" in connection ? connection.source : "";
       const target = "target" in connection ? connection.target : "";
 
-      if (!source || !target) {return false;}
+      if (!source || !target) {
+        return false;
+      }
 
       const validation = validateConnection(source, target);
       return validation.isValid;
@@ -157,7 +161,9 @@ export default function WorkflowCanvas() {
       const reactFlowBounds = (event.target as Element).getBoundingClientRect();
       const data = event.dataTransfer.getData("application/reactflow");
 
-      if (!data) {return;}
+      if (!data) {
+        return;
+      }
 
       const { type, id, label } = JSON.parse(data);
       const position = {

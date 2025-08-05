@@ -54,9 +54,12 @@ export default function CodeSidebar({ isVisible, onToggle }: CodeSidebarProps) {
       }
 
       // Add other properties if they exist
-      if (workflow.defaults) {cleanWorkflow.defaults = workflow.defaults;}
-      if (workflow.concurrency)
-        {cleanWorkflow.concurrency = workflow.concurrency;}
+      if (workflow.defaults) {
+        cleanWorkflow.defaults = workflow.defaults;
+      }
+      if (workflow.concurrency) {
+        cleanWorkflow.concurrency = workflow.concurrency;
+      }
 
       // Add jobs
       cleanWorkflow.jobs = workflow.jobs || {};

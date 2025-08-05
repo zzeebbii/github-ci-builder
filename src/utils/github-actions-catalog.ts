@@ -902,7 +902,9 @@ export const ENHANCED_STEP_TEMPLATES: NodeTemplate[] = [
  */
 export function createStepFromTemplate(templateId: string): Step | null {
   const template = ENHANCED_STEP_TEMPLATES.find(t => t.id === templateId);
-  if (!template || !template.template) {return null;}
+  if (!template || !template.template) {
+    return null;
+  }
 
   return template.template as Step;
 }
@@ -912,7 +914,9 @@ export function createStepFromTemplate(templateId: string): Step | null {
  */
 export function createJobFromTemplate(templateId: string): Job | null {
   const template = ENHANCED_JOB_TEMPLATES.find(t => t.id === templateId);
-  if (!template || !template.template) {return null;}
+  if (!template || !template.template) {
+    return null;
+  }
 
   return template.template as Job;
 }

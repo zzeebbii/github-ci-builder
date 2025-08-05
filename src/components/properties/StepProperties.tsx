@@ -49,15 +49,23 @@ export default function StepProperties({
   );
 
   const validateStep = useCallback(() => {
-    if (!label.trim()) {return false;}
-    if (stepType === "action" && !actionName.trim()) {return false;}
-    if (stepType === "run" && !runCommand.trim()) {return false;}
+    if (!label.trim()) {
+      return false;
+    }
+    if (stepType === "action" && !actionName.trim()) {
+      return false;
+    }
+    if (stepType === "run" && !runCommand.trim()) {
+      return false;
+    }
     return true;
   }, [label, stepType, actionName, runCommand]);
 
   const getValidationErrors = useCallback(() => {
     const errors = [];
-    if (!label.trim()) {errors.push("Step name is required");}
+    if (!label.trim()) {
+      errors.push("Step name is required");
+    }
     if (stepType === "action" && !actionName.trim()) {
       errors.push("Action name is required");
     }

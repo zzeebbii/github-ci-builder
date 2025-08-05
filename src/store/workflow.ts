@@ -263,7 +263,9 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   autoArrangeNodes: () => {
     const { nodes } = get();
-    if (nodes.length === 0) {return;}
+    if (nodes.length === 0) {
+      return;
+    }
 
     // Apply the same waterfall layout as initial render
     const arrangedNodes = WorkflowMapper.optimizeNodeLayout(nodes);
@@ -352,7 +354,9 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
     // Check for circular dependencies
     const wouldCreateCycle = (source: string, target: string): boolean => {
-      if (source === target) {return true;}
+      if (source === target) {
+        return true;
+      }
 
       const targetEdges = edges.filter(e => e.source === target);
       return targetEdges.some(edge => wouldCreateCycle(source, edge.target));
@@ -485,7 +489,9 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       // Check if this edge connects to the clicked node (either as source or target)
       const isConnectedToNode =
         edge.source === nodeId || edge.target === nodeId;
-      if (!isConnectedToNode) {return false;}
+      if (!isConnectedToNode) {
+        return false;
+      }
 
       // Check if both source and target are job nodes
       const sourceNode = nodes.find(n => n.id === edge.source);

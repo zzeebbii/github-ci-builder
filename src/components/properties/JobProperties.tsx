@@ -36,19 +36,32 @@ export default function JobProperties({
   }, [nodeData]);
 
   const validateJob = useCallback(() => {
-    if (!label.trim()) {return false;}
-    if (!runsOn.trim()) {return false;}
-    if (timeoutMinutes <= 0 || timeoutMinutes > 2160) {return false;}
+    if (!label.trim()) {
+      return false;
+    }
+    if (!runsOn.trim()) {
+      return false;
+    }
+    if (timeoutMinutes <= 0 || timeoutMinutes > 2160) {
+      return false;
+    }
     return true;
   }, [label, runsOn, timeoutMinutes]);
 
   const getValidationErrors = useCallback(() => {
     const errors = [];
-    if (!label.trim()) {errors.push("Job name is required");}
-    if (!runsOn.trim()) {errors.push("Runner is required");}
-    if (timeoutMinutes <= 0) {errors.push("Timeout must be greater than 0");}
-    if (timeoutMinutes > 2160)
-      {errors.push("Timeout cannot exceed 2160 minutes (36 hours)");}
+    if (!label.trim()) {
+      errors.push("Job name is required");
+    }
+    if (!runsOn.trim()) {
+      errors.push("Runner is required");
+    }
+    if (timeoutMinutes <= 0) {
+      errors.push("Timeout must be greater than 0");
+    }
+    if (timeoutMinutes > 2160) {
+      errors.push("Timeout cannot exceed 2160 minutes (36 hours)");
+    }
     return errors;
   }, [label, runsOn, timeoutMinutes]);
 

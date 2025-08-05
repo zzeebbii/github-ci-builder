@@ -28,10 +28,14 @@ export default function WorkflowProperties({
 
   const addEnvVariable = () => {
     const key = prompt("Enter environment variable name:");
-    if (!key || key.trim() === "") {return;}
+    if (!key || key.trim() === "") {
+      return;
+    }
 
     const value = prompt("Enter environment variable value:");
-    if (value === null) {return;} // User cancelled
+    if (value === null) {
+      return;
+    } // User cancelled
 
     const trimmedKey = key.trim();
     const currentEnv = workflow.env || {};

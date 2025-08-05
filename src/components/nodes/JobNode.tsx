@@ -26,11 +26,15 @@ function JobNode({ data, selected, id }: NodeProps & { data: JobNodeData }) {
   // Check if this node has any animated job-to-job edges (both incoming and outgoing)
   const hasAnimatedEdges = Array.from(animatedEdges).some(edgeId => {
     const edge = edges.find(e => e.id === edgeId);
-    if (!edge) {return false;}
+    if (!edge) {
+      return false;
+    }
 
     // Check if this edge connects to this node (either as source or target)
     const isConnectedToNode = edge.source === id || edge.target === id;
-    if (!isConnectedToNode) {return false;}
+    if (!isConnectedToNode) {
+      return false;
+    }
 
     // Check if both source and target are job nodes
     const sourceNode = nodes.find(n => n.id === edge.source);
@@ -39,10 +43,18 @@ function JobNode({ data, selected, id }: NodeProps & { data: JobNodeData }) {
   });
 
   const getRunnerColor = () => {
-    if (!data.runsOn || typeof data.runsOn !== "string") {return "text-gray-600";}
-    if (data.runsOn.includes("ubuntu")) {return "text-orange-600";}
-    if (data.runsOn.includes("windows")) {return "text-blue-600";}
-    if (data.runsOn.includes("macos")) {return "text-gray-600";}
+    if (!data.runsOn || typeof data.runsOn !== "string") {
+      return "text-gray-600";
+    }
+    if (data.runsOn.includes("ubuntu")) {
+      return "text-orange-600";
+    }
+    if (data.runsOn.includes("windows")) {
+      return "text-blue-600";
+    }
+    if (data.runsOn.includes("macos")) {
+      return "text-gray-600";
+    }
     return "text-gray-600";
   };
 

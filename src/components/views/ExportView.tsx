@@ -26,12 +26,18 @@ export default function ExportView() {
 
       // Add additional properties if they exist on the workflow
       const workflowAny = workflow as unknown as Record<string, unknown>;
-      if (workflowAny.env) {cleanWorkflow.env = workflowAny.env;}
-      if (workflowAny.defaults) {cleanWorkflow.defaults = workflowAny.defaults;}
-      if (workflowAny.concurrency)
-        {cleanWorkflow.concurrency = workflowAny.concurrency;}
-      if (workflowAny.permissions)
-        {cleanWorkflow.permissions = workflowAny.permissions;}
+      if (workflowAny.env) {
+        cleanWorkflow.env = workflowAny.env;
+      }
+      if (workflowAny.defaults) {
+        cleanWorkflow.defaults = workflowAny.defaults;
+      }
+      if (workflowAny.concurrency) {
+        cleanWorkflow.concurrency = workflowAny.concurrency;
+      }
+      if (workflowAny.permissions) {
+        cleanWorkflow.permissions = workflowAny.permissions;
+      }
 
       const yamlContent = yaml.dump(cleanWorkflow, {
         indent: 2,
