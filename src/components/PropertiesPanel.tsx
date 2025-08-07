@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useWorkflowStore } from "../store/workflow";
-import { X, Settings, AlertCircle, CheckCircle, FileText } from "lucide-react";
-import TriggerProperties from "./properties/TriggerProperties.tsx";
+import { X, Settings, AlertCircle, CheckCircle } from "lucide-react";
+import UnifiedTriggerWorkflowProperties from "./properties/UnifiedTriggerWorkflowProperties.tsx";
 import JobProperties from "./properties/JobProperties.tsx";
 import StepProperties from "./properties/StepProperties.tsx";
-import WorkflowProperties from "./properties/WorkflowProperties.tsx";
 
 interface PropertiesPanelProps {
   position?: "left" | "right";
@@ -15,16 +14,8 @@ export default function PropertiesPanel({
   position = "right",
   onClose,
 }: PropertiesPanelProps) {
-  const {
-    workflow,
-    selectedNode,
-    nodes,
-    showWorkflowProperties,
-    updateNodeData,
-    updateWorkflow,
-    setSelectedNode,
-    setShowWorkflowProperties,
-  } = useWorkflowStore();
+  const { selectedNode, nodes, updateNodeData, setSelectedNode } =
+    useWorkflowStore();
   const [isOpen, setIsOpen] = useState(false);
 
   const selectedNodeData = selectedNode
@@ -32,16 +23,15 @@ export default function PropertiesPanel({
     : null;
 
   useEffect(() => {
-    setIsOpen(!!selectedNode || showWorkflowProperties);
-  }, [selectedNode, showWorkflowProperties]);
+    setIsOpen(!!selectedNode);
+  }, [selectedNode]);
 
   const handleClose = () => {
     if (position === "left" && onClose) {
       onClose();
     } else {
-      // For left panel without onClose, or right panel, clear the selection/workflow state
+      // For left panel without onClose, or right panel, clear the selection
       setSelectedNode(null);
-      setShowWorkflowProperties(false);
       setIsOpen(false);
     }
   };
@@ -55,27 +45,11 @@ export default function PropertiesPanel({
     [selectedNode, updateNodeData]
   );
 
-  const handleUpdateWorkflow = useCallback(
-    (updates: Record<string, unknown>) => {
-      updateWorkflow(updates);
-    },
-    [updateWorkflow]
-  );
-
-  if (!isOpen || (!selectedNodeData && !showWorkflowProperties)) {
+  if (!isOpen || !selectedNodeData) {
     return null;
   }
 
   const renderPropertiesForm = () => {
-    if (showWorkflowProperties) {
-      return (
-        <WorkflowProperties
-          key={`workflow-properties-${workflow.name || "default"}`}
-          onUpdate={handleUpdateWorkflow}
-        />
-      );
-    }
-
     if (!selectedNodeData) {
       return null;
     }
@@ -86,7 +60,7 @@ export default function PropertiesPanel({
     switch (selectedNodeData.type) {
       case "trigger":
         return (
-          <TriggerProperties
+          <UnifiedTriggerWorkflowProperties
             key={nodeKey}
             nodeData={selectedNodeData.data}
             onUpdate={handleUpdateNode}
@@ -133,17 +107,17 @@ export default function PropertiesPanel({
       : "fixed right-0 top-0 h-full w-80 bg-white border-l border-gray-200 shadow-lg z-50 overflow-hidden";
 
   return (
-    <div className={positionClasses}>
+    <div
+      className={`${positionClasses} ${isOpen ? "animate-in slide-in-from-right-4 duration-300" : "animate-out slide-out-to-right-4 duration-200"}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center gap-2">
-          {showWorkflowProperties ? (
-            <FileText className="w-5 h-5 text-gray-600" />
-          ) : (
-            <Settings className="w-5 h-5 text-gray-600" />
-          )}
+          <Settings className="w-5 h-5 text-gray-600" />
           <h2 className="font-semibold text-gray-900">
-            {showWorkflowProperties ? "Workflow Properties" : "Node Properties"}
+            {selectedNodeData?.type === "trigger"
+              ? "Workflow & Trigger Settings"
+              : "Node Properties"}
           </h2>
           {hasErrors ? (
             <AlertCircle className="w-4 h-4 text-red-500" />
@@ -160,25 +134,16 @@ export default function PropertiesPanel({
       </div>
 
       {/* Info Section */}
-      {showWorkflowProperties ? (
-        <div className="p-4 border-b border-gray-200 bg-blue-50">
-          <div className="text-sm font-medium text-blue-900 mb-1">
-            Workflow Configuration
-          </div>
-          <div className="text-xs text-blue-600">
-            Global workflow settings and triggers
-          </div>
+      <div className="p-4 border-b border-gray-200 bg-blue-50">
+        <div className="text-sm font-medium text-blue-900 mb-1">
+          {selectedNodeData.data.label || selectedNodeData.id}
         </div>
-      ) : selectedNodeData ? (
-        <div className="p-4 border-b border-gray-200 bg-blue-50">
-          <div className="text-sm font-medium text-blue-900 mb-1">
-            {selectedNodeData.data.label || selectedNodeData.id}
-          </div>
-          <div className="text-xs text-blue-600 capitalize">
-            {selectedNodeData.type} Node
-          </div>
+        <div className="text-xs text-blue-600 capitalize">
+          {selectedNodeData.type === "trigger"
+            ? "Workflow Entry Point & Settings"
+            : `${selectedNodeData.type} Node`}
         </div>
-      ) : null}
+      </div>
 
       {/* Properties Form */}
       <div className="flex-1 overflow-y-auto">{renderPropertiesForm()}</div>

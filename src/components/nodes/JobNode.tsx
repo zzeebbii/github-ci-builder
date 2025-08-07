@@ -3,6 +3,7 @@ import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
 import { Server, AlertCircle, CheckCircle, Zap } from "lucide-react";
 import { useWorkflowStore } from "../../store/workflow";
+import AddNodeButton from "../ui/AddNodeButton";
 
 interface JobNodeData {
   label: string;
@@ -15,13 +16,16 @@ interface JobNodeData {
 function JobNode({ data, selected, id }: NodeProps & { data: JobNodeData }) {
   const hasErrors = data.errors && data.errors.length > 0;
   const isValid = data.isValid !== false;
-  const toggleEdgeAnimation = useWorkflowStore(
-    state => state.toggleEdgeAnimation
-  );
-  const setSelectedNode = useWorkflowStore(state => state.setSelectedNode);
-  const animatedEdges = useWorkflowStore(state => state.animatedEdges);
-  const edges = useWorkflowStore(state => state.edges);
-  const nodes = useWorkflowStore(state => state.nodes);
+  const {
+    toggleEdgeAnimation,
+    setSelectedNode,
+    animatedEdges,
+    edges,
+    nodes,
+    addNode,
+    addEdge,
+    autoArrangeNodes,
+  } = useWorkflowStore();
 
   // Check if this node has any animated job-to-job edges (both incoming and outgoing)
   const hasAnimatedEdges = Array.from(animatedEdges).some(edgeId => {
@@ -56,6 +60,91 @@ function JobNode({ data, selected, id }: NodeProps & { data: JobNodeData }) {
       return "text-gray-600";
     }
     return "text-gray-600";
+  };
+
+  const handleAddNode = (
+    nodeType: string,
+    nodeData: { label: string; action?: string; run?: string }
+  ) => {
+    if (nodeType !== "step") {
+      return;
+    }
+
+    // Find if this job already has outgoing edges to steps
+    const existingStepEdges = edges.filter(
+      edge => edge.source === id && edge.target.startsWith(`${id}-step-`)
+    );
+
+    const stepId = `${id}-step-${Date.now()}`;
+    const newNode = {
+      id: stepId,
+      type: "step" as const,
+      position: { x: 300, y: 300 },
+      data: {
+        ...nodeData,
+        step: {
+          name: nodeData.label,
+          ...(nodeData.action && { uses: nodeData.action }),
+          ...(nodeData.run && { run: nodeData.run }),
+        },
+      },
+    };
+
+    addNode(newNode);
+
+    if (existingStepEdges.length > 0) {
+      // There are existing steps, insert the new step between job and first existing step
+      const firstStepEdge = existingStepEdges[0];
+      const firstStepId = firstStepEdge.target;
+
+      // Remove the existing edge from job to first step
+      const updatedEdges = edges.filter(edge => edge.id !== firstStepEdge.id);
+
+      // Add edge from job to new step
+      const jobToNewStepEdge = {
+        id: `edge-${id}-${stepId}`,
+        source: id,
+        target: stepId,
+        sourceHandle: "job-source",
+        targetHandle: "step-target",
+        type: "insertable" as const,
+      };
+
+      // Add edge from new step to first existing step
+      const newStepToFirstStepEdge = {
+        id: `edge-${stepId}-${firstStepId}`,
+        source: stepId,
+        target: firstStepId,
+        sourceHandle: "step-source",
+        targetHandle: "step-target",
+        type: "insertable" as const,
+      };
+
+      // Update the store with all changes
+      useWorkflowStore.setState(() => ({
+        edges: [...updatedEdges, jobToNewStepEdge, newStepToFirstStepEdge],
+      }));
+
+      // Auto-arrange the layout after adding the new step
+      setTimeout(() => {
+        autoArrangeNodes();
+      }, 100);
+    } else {
+      // No existing steps, just connect job to new step
+      addEdge({
+        id: `edge-${id}-${stepId}`,
+        source: id,
+        target: stepId,
+        sourceHandle: "job-source",
+        targetHandle: "step-target",
+        type: "insertable",
+      });
+
+      // Auto-arrange the layout after adding the new step
+      setTimeout(() => {
+        autoArrangeNodes();
+      }, 100);
+    }
   };
 
   const handleClick = (event: React.MouseEvent) => {
@@ -134,6 +223,11 @@ function JobNode({ data, selected, id }: NodeProps & { data: JobNodeData }) {
         id="job-source"
         className="w-3 h-3 !bg-purple-400 !border-2 !border-white"
       />
+
+      {/* Always show add button below the job */}
+      <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2">
+        <AddNodeButton onAddNode={handleAddNode} context="job" />
+      </div>
     </div>
   );
 }

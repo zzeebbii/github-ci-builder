@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useWorkflowStore } from "../../store/workflow";
 import type {
+  GitHubWorkflow,
   WorkflowTriggers,
   PushTrigger,
   PullRequestTrigger,
@@ -14,20 +15,23 @@ import {
   GitPullRequest,
   Play,
   Clock,
+  Settings,
+  Globe,
+  Shield,
 } from "lucide-react";
 
-interface TriggerPropertiesProps {
+interface UnifiedTriggerWorkflowPropertiesProps {
   nodeData: Record<string, unknown>;
   onUpdate: (data: Record<string, unknown>) => void;
 }
 
 type TriggerKey = keyof WorkflowTriggers;
 
-export default function TriggerProperties({
+export default function UnifiedTriggerWorkflowProperties({
   nodeData,
   onUpdate,
-}: TriggerPropertiesProps) {
-  const { workflow } = useWorkflowStore();
+}: UnifiedTriggerWorkflowPropertiesProps) {
+  const { workflow, updateWorkflow } = useWorkflowStore();
   const [label, setLabel] = useState((nodeData.label as string) || "");
   const [triggers, setTriggers] = useState<WorkflowTriggers>(workflow.on);
 
@@ -80,8 +84,8 @@ export default function TriggerProperties({
       const updatedData = {
         label,
         triggerType: primaryTrigger,
-        triggers: triggers, // Pass the full triggers object
-        trigger: triggers, // Keep for backward compatibility
+        triggers: triggers,
+        trigger: triggers,
         isValid: triggerKeys.length > 0,
         errors:
           triggerKeys.length === 0
@@ -94,6 +98,13 @@ export default function TriggerProperties({
 
     return () => clearTimeout(timeoutId);
   }, [label, triggers, onUpdate]);
+
+  const handleWorkflowUpdate = useCallback(
+    (updates: Partial<GitHubWorkflow>) => {
+      updateWorkflow(updates);
+    },
+    [updateWorkflow]
+  );
 
   const handleTriggerToggle = useCallback(
     (triggerType: keyof WorkflowTriggers) => {
@@ -128,9 +139,10 @@ export default function TriggerProperties({
       }
 
       setTriggers(newTriggers);
-      // The useEffect will handle updating the workflow through onUpdate
+      // Also update the workflow
+      handleWorkflowUpdate({ on: newTriggers });
     },
-    [triggers]
+    [triggers, handleWorkflowUpdate]
   );
 
   const updatePushPullRequestConfig = useCallback(
@@ -145,8 +157,9 @@ export default function TriggerProperties({
         branches,
       };
       setTriggers(newTriggers);
+      handleWorkflowUpdate({ on: newTriggers });
     },
-    [triggers]
+    [triggers, handleWorkflowUpdate]
   );
 
   const updateScheduleConfig = useCallback(
@@ -154,8 +167,9 @@ export default function TriggerProperties({
       const newTriggers = { ...triggers };
       newTriggers.schedule = [{ cron }];
       setTriggers(newTriggers);
+      handleWorkflowUpdate({ on: newTriggers });
     },
-    [triggers]
+    [triggers, handleWorkflowUpdate]
   );
 
   const updateReleaseConfig = useCallback(
@@ -163,9 +177,38 @@ export default function TriggerProperties({
       const newTriggers = { ...triggers };
       newTriggers.release = { types } as ReleaseTrigger;
       setTriggers(newTriggers);
+      handleWorkflowUpdate({ on: newTriggers });
     },
-    [triggers]
+    [triggers, handleWorkflowUpdate]
   );
+
+  const addEnvVariable = () => {
+    const key = prompt("Enter environment variable name:");
+    if (!key || key.trim() === "") {
+      return;
+    }
+
+    const value = prompt("Enter environment variable value:");
+    if (value === null) {
+      return;
+    } // User cancelled
+
+    const trimmedKey = key.trim();
+    const currentEnv = workflow.env || {};
+    const newEnv = { ...currentEnv, [trimmedKey]: value };
+
+    handleWorkflowUpdate({ env: newEnv });
+  };
+
+  const removeEnvVariable = (key: string) => {
+    const currentEnv = workflow.env || {};
+    const newEnv = { ...currentEnv };
+    delete newEnv[key];
+
+    handleWorkflowUpdate({
+      env: Object.keys(newEnv).length > 0 ? newEnv : undefined,
+    });
+  };
 
   const getTriggerIcon = (triggerType: string) => {
     switch (triggerType) {
@@ -210,26 +253,66 @@ export default function TriggerProperties({
   };
 
   return (
-    <div className="p-4 space-y-6">
-      {/* Node Label */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Trigger Node Label
-        </label>
-        <input
-          type="text"
-          value={label}
-          onChange={e => setLabel(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Enter trigger node label"
-        />
+    <div className="p-4 space-y-6 animate-in slide-in-from-right-2 duration-300">
+      {/* Workflow Settings Section */}
+      <div className="space-y-4 transition-all duration-200 ease-in-out">
+        <div className="flex items-center gap-2 border-b pb-2">
+          <Settings className="w-4 h-4 text-gray-600" />
+          <h3 className="text-sm font-semibold text-gray-900">
+            Workflow Settings
+          </h3>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Workflow Name
+          </label>
+          <input
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="CI"
+            value={workflow.name || ""}
+            onChange={e =>
+              handleWorkflowUpdate({ name: e.target.value || undefined })
+            }
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Trigger Node Label
+          </label>
+          <input
+            type="text"
+            value={label}
+            onChange={e => setLabel(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter trigger node label"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Run Name (optional)
+          </label>
+          <input
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Deploy by @${{ github.actor }}"
+            value={workflow["run-name"] || ""}
+            onChange={e =>
+              handleWorkflowUpdate({ "run-name": e.target.value || undefined })
+            }
+          />
+        </div>
       </div>
 
-      {/* Trigger Configuration */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 border-b pb-2">
-          Active Triggers
-        </h3>
+      {/* Triggers Section */}
+      <div className="space-y-4 transition-all duration-200 ease-in-out">
+        <div className="flex items-center gap-2 border-b pb-2">
+          <Play className="w-4 h-4 text-gray-600" />
+          <h3 className="text-sm font-semibold text-gray-900">Triggers</h3>
+        </div>
 
         <div className="space-y-3">
           {[
@@ -363,12 +446,110 @@ export default function TriggerProperties({
         </div>
       </div>
 
+      {/* Environment Variables Section */}
+      <div className="space-y-4 transition-all duration-200 ease-in-out">
+        <div className="flex items-center justify-between border-b pb-2">
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-gray-600" />
+            <h3 className="text-sm font-semibold text-gray-900">
+              Environment Variables
+            </h3>
+          </div>
+          <button
+            onClick={addEnvVariable}
+            className="text-xs text-blue-600 hover:text-blue-800 font-medium px-2 py-1 rounded hover:bg-blue-50 transition-colors cursor-pointer"
+          >
+            + Add
+          </button>
+        </div>
+
+        {Object.entries(workflow.env || {}).length === 0 ? (
+          <div className="text-sm text-gray-500 italic">
+            No environment variables configured
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {Object.entries(workflow.env || {}).map(([key, value]) => (
+              <div key={key} className="flex items-center gap-2 text-sm">
+                <code className="bg-gray-100 px-2 py-1 rounded font-mono text-gray-800 flex-1 text-xs">
+                  {key}={String(value)}
+                </code>
+                <button
+                  onClick={() => removeEnvVariable(key)}
+                  className="text-red-600 hover:text-red-800 font-bold text-sm px-1 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                  title={`Remove ${key}`}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Permissions Section */}
+      <div className="space-y-4 transition-all duration-200 ease-in-out">
+        <div className="flex items-center gap-2 border-b pb-2">
+          <Shield className="w-4 h-4 text-gray-600" />
+          <h3 className="text-sm font-semibold text-gray-900">Permissions</h3>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          {[
+            "contents",
+            "actions",
+            "checks",
+            "deployments",
+            "issues",
+            "packages",
+            "pull-requests",
+            "security-events",
+          ].map(permission => (
+            <label
+              key={permission}
+              className="flex items-center space-x-2 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                checked={
+                  !!((workflow.permissions as Record<string, unknown>) || {})[
+                    permission
+                  ]
+                }
+                onChange={e => {
+                  const newPermissions = { ...(workflow.permissions || {}) };
+                  if (e.target.checked) {
+                    (newPermissions as Record<string, string>)[permission] =
+                      "read";
+                  } else {
+                    delete (newPermissions as Record<string, unknown>)[
+                      permission
+                    ];
+                  }
+                  handleWorkflowUpdate({
+                    permissions:
+                      Object.keys(newPermissions).length > 0
+                        ? newPermissions
+                        : undefined,
+                  });
+                }}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-gray-700 capitalize text-xs">
+                {permission.replace("-", " ")}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       {/* Help Text */}
       <div className="mt-6 p-3 bg-blue-50 rounded-md">
         <p className="text-xs text-blue-700">
-          <strong>Trigger Configuration:</strong> Select one or more triggers
-          that will start this workflow. Changes here will sync with the
-          workflow settings and affect when your workflow runs.
+          <strong>Unified Configuration:</strong> This panel combines workflow
+          settings and trigger configuration. Changes here affect both the
+          workflow metadata and when your workflow runs. The trigger node
+          represents the entry point and workflow settings combined.
         </p>
       </div>
     </div>

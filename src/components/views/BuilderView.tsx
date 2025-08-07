@@ -1,18 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
-import {
-  Play,
-  Upload,
-  Save,
-  Undo,
-  Redo,
-  Settings,
-  Code2,
-  History,
-} from "lucide-react";
+import { Play, Upload, Save, Undo, Redo, Code2, History } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useWorkflowStore } from "../../store/workflow";
 import { useHistoryStore } from "../../store/history";
-import Sidebar from "../layout/Sidebar";
 import WorkflowCanvas from "../WorkflowCanvas";
 import Button from "../ui/Button";
 import ToolbarSeparator from "../ui/ToolbarSeparator";
@@ -21,16 +11,9 @@ import CodeSidebar from "../CodeSidebar";
 import HistoryPanel from "../HistoryPanel";
 
 export default function BuilderView() {
-  const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [showCodeSidebar, setShowCodeSidebar] = useState(false);
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const {
-    selectedNode,
-    showWorkflowProperties,
-    setShowWorkflowProperties,
-    clearEdgeAnimations,
-  } = useWorkflowStore();
+  const { selectedNode, clearEdgeAnimations } = useWorkflowStore();
   const { canUndo, canRedo, undo, redo, history } = useHistoryStore();
 
   // Add keyboard shortcuts
@@ -47,15 +30,7 @@ export default function BuilderView() {
   }, [clearEdgeAnimations]);
 
   // Automatically show left properties panel when there's something to show
-  const showPropertiesLeft = !!(selectedNode || showWorkflowProperties);
-
-  const handleWorkflowSettings = useCallback(() => {
-    setShowWorkflowProperties(true);
-  }, [setShowWorkflowProperties]);
-
-  const handleToggleSidebar = useCallback(() => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
-  }, [isSidebarCollapsed]);
+  const showPropertiesLeft = !!selectedNode;
 
   const handleUndo = useCallback(() => {
     undo(); // The history store now automatically restores state
@@ -67,13 +42,6 @@ export default function BuilderView() {
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <Sidebar
-        selectedTool={selectedTool}
-        onToolSelect={setSelectedTool}
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={handleToggleSidebar}
-      />
-
       <main className="flex-1 flex flex-col bg-gray-50 relative">
         {/* Toolbar */}
         <div className="border-b bg-white px-4 py-2 flex items-center justify-between">
@@ -81,13 +49,6 @@ export default function BuilderView() {
             <Button variant="primary">
               <Play className="w-4 h-4" />
               Test Workflow
-            </Button>
-
-            <ToolbarSeparator />
-
-            <Button onClick={handleWorkflowSettings}>
-              <Settings className="w-4 h-4" />
-              Workflow Settings
             </Button>
 
             <ToolbarSeparator />
@@ -157,13 +118,9 @@ export default function BuilderView() {
           <WorkflowCanvas />
         </div>
 
-        {/* Left Properties Panel - Positioned next to sidebar */}
+        {/* Left Properties Panel */}
         {showPropertiesLeft && (
-          <div
-            className={`fixed top-16 h-[calc(100vh-4rem)] w-80 bg-white border-r border-gray-200 shadow-lg z-40 overflow-hidden transition-all duration-300 ${
-              isSidebarCollapsed ? "left-12" : "left-64"
-            }`}
-          >
+          <div className="fixed top-16 left-0 h-[calc(100vh-4rem)] w-80 bg-white border-r border-gray-200 shadow-lg z-40 overflow-hidden transition-all duration-300">
             <PropertiesPanel position="left" />
           </div>
         )}

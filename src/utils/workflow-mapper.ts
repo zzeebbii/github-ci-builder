@@ -51,21 +51,23 @@ export class WorkflowMapper {
       };
     };
 
-    // Create trigger node - positioned at the top center
-    const triggerNode: VisualNode = {
-      id: "trigger",
-      type: "trigger",
-      position: { x: 100, y: triggerY },
-      data: {
-        label: this.getTriggerLabel(workflow.on),
-        triggerType: this.getPrimaryTriggerType(workflow.on),
-        triggers: workflow.on, // Pass the full triggers object
-        trigger: workflow.on, // Keep for backward compatibility
-        isValid: true,
-        errors: [],
-      },
-    };
-    nodes.push(triggerNode);
+    // Create trigger node only if there are triggers defined
+    if (workflow.on && Object.keys(workflow.on).length > 0) {
+      const triggerNode: VisualNode = {
+        id: "trigger",
+        type: "trigger",
+        position: { x: 100, y: triggerY },
+        data: {
+          label: this.getTriggerLabel(workflow.on),
+          triggerType: this.getPrimaryTriggerType(workflow.on),
+          triggers: workflow.on, // Pass the full triggers object
+          trigger: workflow.on, // Keep for backward compatibility
+          isValid: true,
+          errors: [],
+        },
+      };
+      nodes.push(triggerNode);
+    }
 
     // Create job nodes and their dependencies
     const jobIds = Object.keys(workflow.jobs);
@@ -154,7 +156,7 @@ export class WorkflowMapper {
             target: stepNodeId,
             sourceHandle: stepIndex === 0 ? "job-source" : "step-source",
             targetHandle: "step-target",
-            type: "default",
+            type: "insertable",
             animated: true,
             style: {
               stroke: "#10b981", // Green for step flow
@@ -185,7 +187,7 @@ export class WorkflowMapper {
               target: targetNodeId,
               sourceHandle: "job-source",
               targetHandle: "job-target",
-              type: "default",
+              type: "insertable",
               animated: false,
               style: {
                 stroke: "#8b5cf6", // Purple for job dependencies
@@ -211,7 +213,7 @@ export class WorkflowMapper {
           target: targetNodeId,
           sourceHandle: "trigger-source",
           targetHandle: "job-target",
-          type: "default",
+          type: "insertable",
           animated: true,
           style: {
             stroke: "#3b82f6", // Blue for trigger connections
@@ -273,14 +275,56 @@ export class WorkflowMapper {
       const jobId = jobNode.id.replace("job-", "");
 
       // Find steps for this job
-      const jobSteps = stepNodes
-        .filter(stepNode => stepNode.id.startsWith(`${jobNode.id}-step-`))
-        .sort((a, b) => {
-          const aIndex = parseInt(a.id.split("-step-")[1]);
-          const bIndex = parseInt(b.id.split("-step-")[1]);
-          return aIndex - bIndex;
+      const jobStepFilter = stepNodes.filter(stepNode => {
+        return stepNode.id.startsWith(`${jobNode.id}-step-`);
+      });
+
+      // Order steps based on edge connections instead of ID sorting
+      const orderedSteps: VisualNode[] = [];
+
+      if (jobStepFilter.length > 0) {
+        // Find the first step (connected directly from the job)
+        const firstStepEdge = edges.find(
+          edge =>
+            edge.source === jobNode.id &&
+            edge.target.startsWith(`${jobNode.id}-step-`)
+        );
+
+        if (firstStepEdge) {
+          let currentStepId: string | null = firstStepEdge.target;
+
+          // Follow the chain of step connections
+          while (currentStepId) {
+            const currentStep = jobStepFilter.find(
+              step => step.id === currentStepId
+            );
+            if (currentStep) {
+              orderedSteps.push(currentStep);
+
+              // Find the next step in the chain
+              const nextStepEdge = edges.find(
+                edge =>
+                  edge.source === currentStepId &&
+                  edge.target.startsWith(`${jobNode.id}-step-`)
+              );
+              currentStepId = nextStepEdge?.target || null;
+            } else {
+              break;
+            }
+          }
+        }
+
+        // Add any remaining steps that weren't connected (fallback)
+        const remainingSteps = jobStepFilter.filter(
+          step => !orderedSteps.find(ordered => ordered.id === step.id)
+        );
+        orderedSteps.push(...remainingSteps);
+      }
+
+      const jobSteps = orderedSteps
+        .map(stepNode => {
+          return stepNode.data.step!;
         })
-        .map(stepNode => stepNode.data.step!)
         .filter(Boolean);
 
       // Find job dependencies

@@ -7,7 +7,13 @@ import type {
 } from "../types/github-actions";
 import { WorkflowMapper } from "../utils/workflow-mapper";
 import { useHistoryStore } from "./history";
-import { DEFAULT_WORKFLOW } from "../data/default-workflows";
+
+// Empty workflow template
+const EMPTY_WORKFLOW: GitHubWorkflow = {
+  name: "New Workflow",
+  on: {},
+  jobs: {},
+};
 
 // Simple validation function
 const validateGitHubWorkflow = (workflow: GitHubWorkflow): ValidationResult => {
@@ -103,7 +109,7 @@ interface WorkflowState {
 
 export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   // Initial state
-  workflow: DEFAULT_WORKFLOW,
+  workflow: EMPTY_WORKFLOW,
   nodes: [],
   edges: [],
   selectedNode: null,
@@ -168,6 +174,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   syncFromVisual: () => {
     const { nodes, edges, workflow: currentWorkflow } = get();
+
     const workflow = WorkflowMapper.visualToYaml(nodes, edges);
 
     // Preserve the existing workflow name and other metadata
@@ -451,7 +458,9 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   resetToDefault: () => {
     set({
-      workflow: DEFAULT_WORKFLOW,
+      workflow: EMPTY_WORKFLOW,
+      nodes: [],
+      edges: [],
       selectedNode: null,
       isValid: true,
       errors: [],

@@ -392,7 +392,14 @@ export interface VisualEdge {
   target: string;
   sourceHandle?: string;
   targetHandle?: string;
-  type?: "default" | "straight" | "step" | "smoothstep" | "dependency" | "flow";
+  type?:
+    | "default"
+    | "straight"
+    | "step"
+    | "smoothstep"
+    | "dependency"
+    | "flow"
+    | "insertable";
   animated?: boolean;
   style?: React.CSSProperties;
   label?: string;

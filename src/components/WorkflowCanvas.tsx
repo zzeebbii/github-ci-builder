@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import {
   ReactFlow,
   Background,
@@ -8,12 +8,21 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from "@xyflow/react";
-import type { Connection, Node, NodeChange, EdgeChange } from "@xyflow/react";
+import type {
+  Connection,
+  Node,
+  NodeChange,
+  EdgeChange,
+  Viewport,
+} from "@xyflow/react";
 import { useWorkflowStore } from "../store/workflow";
 import type { VisualNode, VisualEdge } from "../types/github-actions";
 import TriggerNode from "./nodes/TriggerNode";
 import JobNode from "./nodes/JobNode";
 import StepNode from "./nodes/StepNode";
+import InsertableEdge from "./edges/InsertableEdge";
+import EmptyCanvas from "./ui/EmptyCanvas";
+import OnboardingHint from "./ui/OnboardingHint";
 
 // Define custom node types
 const nodeTypes = {
@@ -22,7 +31,14 @@ const nodeTypes = {
   step: StepNode,
 };
 
+// Define custom edge types
+const edgeTypes = {
+  insertable: InsertableEdge,
+};
+
 export default function WorkflowCanvas() {
+  const [showOnboardingHint, setShowOnboardingHint] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
   const {
     nodes,
     edges,
@@ -37,6 +53,24 @@ export default function WorkflowCanvas() {
     setSelectedNode,
     animatedEdges,
   } = useWorkflowStore();
+
+  // Show onboarding hint when first trigger is added
+  useEffect(() => {
+    const hasOnlyTrigger = nodes.length === 1 && nodes[0]?.type === "trigger";
+    const hasDismissedHint =
+      localStorage.getItem("onboarding-hint-dismissed") === "true";
+
+    if (hasOnlyTrigger && !hasDismissedHint) {
+      setShowOnboardingHint(true);
+    } else {
+      setShowOnboardingHint(false);
+    }
+  }, [nodes.length, nodes]);
+
+  const handleDismissOnboardingHint = () => {
+    setShowOnboardingHint(false);
+    localStorage.setItem("onboarding-hint-dismissed", "true");
+  };
 
   // Apply animation state to edges
   const animatedEdgesArray = edges.map(edge => {
@@ -114,7 +148,7 @@ export default function WorkflowCanvas() {
         target: params.target,
         sourceHandle: params.sourceHandle || undefined,
         targetHandle: params.targetHandle || undefined,
-        type: "default" as const,
+        type: "insertable" as const,
         animated: true,
       };
       addStoreEdge(newEdge);
@@ -148,6 +182,10 @@ export default function WorkflowCanvas() {
   const onPaneClick = useCallback(() => {
     setSelectedNode(null);
   }, [setSelectedNode]);
+
+  const onViewportChange = useCallback((viewport: Viewport) => {
+    setZoomLevel(viewport.zoom);
+  }, []);
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -218,16 +256,22 @@ export default function WorkflowCanvas() {
       {/* Auto-arrange button */}
       <button
         onClick={autoArrangeNodes}
-        className="absolute top-4 right-4 z-10 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium transition-colors"
+        className="absolute top-4 right-4 z-10 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium transition-colors cursor-pointer"
         title="Auto-arrange nodes"
       >
         Auto-arrange
       </button>
 
+      {/* Zoom level indicator */}
+      <div className="absolute top-4 left-4 z-10 bg-white border border-gray-300 px-3 py-2 rounded-lg shadow-lg text-sm font-medium text-gray-700">
+        Zoom: {Math.round(zoomLevel * 100)}%
+      </div>
+
       <ReactFlow
         nodes={nodes}
         edges={animatedEdgesArray}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
@@ -236,7 +280,7 @@ export default function WorkflowCanvas() {
         onPaneClick={onPaneClick}
         onDragOver={onDragOver}
         onDrop={onDrop}
-        fitView
+        onViewportChange={onViewportChange}
         className="bg-gray-50"
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         minZoom={0.5}
@@ -262,18 +306,13 @@ export default function WorkflowCanvas() {
       </ReactFlow>
 
       {/* Empty state */}
-      {nodes.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="text-center text-gray-500 bg-white/80 p-6 rounded-lg backdrop-blur-sm">
-            <h3 className="text-lg font-medium mb-2">
-              Start Building Your Workflow
-            </h3>
-            <p className="text-sm">
-              Drag components from the sidebar or import an existing YAML file
-            </p>
-          </div>
-        </div>
-      )}
+      {nodes.length === 0 && <EmptyCanvas />}
+
+      {/* Onboarding hint */}
+      <OnboardingHint
+        show={showOnboardingHint}
+        onDismiss={handleDismissOnboardingHint}
+      />
 
       {/* Selection indicator */}
       {selectedNode && (

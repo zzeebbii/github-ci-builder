@@ -22,7 +22,7 @@ export default function Button({
   type = "button",
 }: ButtonProps) {
   const baseClasses =
-    "inline-flex items-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-flex items-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer";
 
   const variants = {
     primary: "text-white bg-blue-600 border border-blue-600 hover:bg-blue-700",

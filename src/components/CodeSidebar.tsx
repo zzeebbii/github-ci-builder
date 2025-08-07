@@ -136,7 +136,7 @@ export default function CodeSidebar({ isVisible, onToggle }: CodeSidebarProps) {
 
   return (
     <div
-      className={`fixed right-0 top-0 h-full bg-white border-l shadow-xl z-10 flex flex-col transition-all duration-300 ${sidebarWidth} ${minWidth}`}
+      className={`fixed right-0 top-0 h-full bg-white border-l shadow-xl z-10 flex flex-col transition-all duration-300 animate-in slide-in-from-right-2 ${sidebarWidth} ${minWidth}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b bg-gray-50">

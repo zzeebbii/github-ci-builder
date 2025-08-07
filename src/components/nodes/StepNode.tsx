@@ -3,6 +3,7 @@ import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
 import { Play, Code, Package, AlertCircle, CheckCircle } from "lucide-react";
 import { useWorkflowStore } from "../../store/workflow";
+import AddNodeButton from "../ui/AddNodeButton";
 
 interface StepNodeData {
   label: string;
@@ -15,7 +16,95 @@ interface StepNodeData {
 function StepNode({ data, selected, id }: NodeProps & { data: StepNodeData }) {
   const hasErrors = data.errors && data.errors.length > 0;
   const isValid = data.isValid !== false;
-  const setSelectedNode = useWorkflowStore(state => state.setSelectedNode);
+  const { setSelectedNode, addNode, addEdge, edges, autoArrangeNodes } =
+    useWorkflowStore();
+
+  const handleAddNode = (
+    nodeType: string,
+    nodeData: { label: string; action?: string; run?: string }
+  ) => {
+    if (nodeType !== "step") {
+      return;
+    }
+
+    const jobId = id.split("-step-")[0];
+
+    // Find if this step has outgoing edges to other steps
+    const existingOutgoingEdges = edges.filter(
+      edge => edge.source === id && edge.target.startsWith(`${jobId}-step-`)
+    );
+
+    const stepId = `${jobId}-step-${Date.now()}`;
+    const newNode = {
+      id: stepId,
+      type: "step" as const,
+      position: { x: 300, y: 400 },
+      data: {
+        ...nodeData,
+        step: {
+          name: nodeData.label,
+          ...(nodeData.action && { uses: nodeData.action }),
+          ...(nodeData.run && { run: nodeData.run }),
+        },
+      },
+    };
+
+    addNode(newNode);
+
+    if (existingOutgoingEdges.length > 0) {
+      // There are existing steps after this one, insert between them
+      const nextStepEdge = existingOutgoingEdges[0];
+      const nextStepId = nextStepEdge.target;
+
+      // Remove the existing edge from current step to next step
+      const updatedEdges = edges.filter(edge => edge.id !== nextStepEdge.id);
+
+      // Add edge from current step to new step
+      const currentToNewStepEdge = {
+        id: `edge-${id}-${stepId}`,
+        source: id,
+        target: stepId,
+        sourceHandle: "step-source",
+        targetHandle: "step-target",
+        type: "insertable" as const,
+      };
+
+      // Add edge from new step to next step
+      const newStepToNextStepEdge = {
+        id: `edge-${stepId}-${nextStepId}`,
+        source: stepId,
+        target: nextStepId,
+        sourceHandle: "step-source",
+        targetHandle: "step-target",
+        type: "insertable" as const,
+      };
+
+      // Update the store with all changes
+      useWorkflowStore.setState(() => ({
+        edges: [...updatedEdges, currentToNewStepEdge, newStepToNextStepEdge],
+      }));
+
+      // Auto-arrange the layout after adding the new step
+      setTimeout(() => {
+        autoArrangeNodes();
+      }, 100);
+    } else {
+      // No existing steps after this one, just connect current step to new step
+      addEdge({
+        id: `edge-${id}-${stepId}`,
+        source: id,
+        target: stepId,
+        sourceHandle: "step-source",
+        targetHandle: "step-target",
+        type: "insertable",
+      });
+
+      // Auto-arrange the layout after adding the new step
+      setTimeout(() => {
+        autoArrangeNodes();
+      }, 100);
+    }
+  };
 
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -95,6 +184,11 @@ function StepNode({ data, selected, id }: NodeProps & { data: StepNodeData }) {
         id="step-source"
         className="w-2 h-2 !bg-green-400 !border-2 !border-white"
       />
+
+      {/* Always show add button below the step */}
+      <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2">
+        <AddNodeButton onAddNode={handleAddNode} context="step" />
+      </div>
     </div>
   );
 }

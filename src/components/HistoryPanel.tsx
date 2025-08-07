@@ -87,7 +87,7 @@ export default function HistoryPanel({
 
   return (
     <div
-      className={`fixed top-16 right-0 w-80 bg-white border-l border-gray-200 shadow-lg z-30 transition-all duration-300 flex flex-col ${
+      className={`fixed top-16 right-0 w-80 bg-white border-l border-gray-200 shadow-lg z-30 transition-all duration-300 flex flex-col animate-in slide-in-from-right-2 ${
         isExpanded ? "h-96" : "h-16"
       }`}
     >
